@@ -8,7 +8,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
   
   try {
     const requestBody = {
-      model: "mistralai/mistral-7b-instruct:free",
+      model: "mistralai/mistral-7b-instruct",
       messages: [{
         role: "system",
         content: "Você é um personal trainer profissional especializado em fitness e nutrição. Forneça respostas detalhadas e personalizadas sobre exercícios, nutrição e bem-estar, mantendo um tom profissional e motivador."
@@ -33,8 +33,11 @@ export const askMistral = async (prompt: string): Promise<string> => {
         "Authorization": `Bearer ${import.meta.env.VITE_MISTRAL_API_KEY}`,
         "HTTP-Referer": "https://fitjourney-app.vercel.app",
         "X-Title": "FitJourney",
-        "Origin": "https://fitjourney-app.vercel.app"
+        "Origin": "https://fitjourney-app.vercel.app",
+        "Accept": "application/json"
       },
+      mode: 'cors',
+      credentials: 'omit',
       body: JSON.stringify(requestBody)
     });
 
@@ -43,11 +46,27 @@ export const askMistral = async (prompt: string): Promise<string> => {
       console.error("[ERRO NA API]", {
         status: response.status,
         statusText: response.statusText,
-        error: errorText
+        error: errorText,
+        headers: Object.fromEntries(response.headers.entries())
       });
 
       if (response.status === 401) {
         return "Erro de autenticação. Por favor, verifique as configurações da API.";
+      }
+
+      if (response.status === 405) {
+        console.error("[ERRO 405] Headers enviados:", {
+          headers: Object.fromEntries(response.headers.entries()),
+          requestHeaders: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer [REDACTED]",
+            "HTTP-Referer": "https://fitjourney-app.vercel.app",
+            "X-Title": "FitJourney",
+            "Origin": "https://fitjourney-app.vercel.app",
+            "Accept": "application/json"
+          }
+        });
+        return "Erro de método HTTP. Por favor, tente novamente em alguns instantes.";
       }
 
       throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
