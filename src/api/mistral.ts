@@ -13,16 +13,9 @@ export const askMistral = async (prompt: string): Promise<string> => {
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
     const requestUrl = '/api/v1/chat/completions';
-    console.log("Enviando requisição para:", requestUrl);
-    console.log("Headers:", {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${import.meta.env.VITE_MISTRAL_API_KEY}`,
-      "HTTP-Referer": "https://localhost:5174/",
-      "X-Title": "FitJourney"
-    });
-
+    
     const requestBody = {
-      model: "mistralai/mistral-7b-instruct:free",
+      model: "mistral-7b-instruct",
       messages: [{
         role: "system",
         content: "Você é um personal trainer profissional especializado em fitness e nutrição. Forneça respostas detalhadas e personalizadas sobre exercícios, nutrição e bem-estar, mantendo um tom profissional e motivador."
@@ -36,14 +29,17 @@ export const askMistral = async (prompt: string): Promise<string> => {
       stream: false
     };
     
-    console.log("Request body:", JSON.stringify(requestBody, null, 2));
+    console.log("[ENVIANDO REQUISIÇÃO]", {
+      url: requestUrl,
+      body: requestBody
+    });
 
     const response = await fetch(requestUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${import.meta.env.VITE_MISTRAL_API_KEY}`,
-        "HTTP-Referer": "https://localhost:5174/",
+        "HTTP-Referer": "https://fitjourney-app.vercel.app",
         "X-Title": "FitJourney"
       },
       body: JSON.stringify(requestBody),
@@ -53,7 +49,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
     clearTimeout(timeoutId);
 
     const responseText = await response.text();
-    console.log("Raw response:", responseText);
+    console.log("[RESPOSTA BRUTA]:", responseText);
 
     if (!response.ok) {
       console.error("[ERRO NA API]", {
@@ -69,6 +65,10 @@ export const askMistral = async (prompt: string): Promise<string> => {
 
       if (response.status === 401) {
         return "Erro de autenticação. Por favor, verifique as configurações da API.";
+      }
+
+      if (response.status === 405) {
+        return "Erro de método HTTP. Por favor, tente novamente em alguns instantes.";
       }
 
       throw new Error(`Erro HTTP ${response.status}: ${responseText}`);
