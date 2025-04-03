@@ -1,8 +1,6 @@
 // src/api/mistral.ts
 export const askMistral = async (prompt: string): Promise<string> => {
   console.log("=== INICIANDO REQUISIÇÃO MISTRAL ===");
-  console.log("Ambiente:", import.meta.env.MODE);
-  console.log("API Key presente:", !!import.meta.env.VITE_MISTRAL_API_KEY);
   
   if (!import.meta.env.VITE_MISTRAL_API_KEY) {
     throw new Error("API Key não encontrada");
@@ -10,15 +8,13 @@ export const askMistral = async (prompt: string): Promise<string> => {
   
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-    const requestUrl = '/api/v1/chat/completions';
-    
     const requestBody = {
-      model: "mistral-7b-instruct",
+      model: "openai/gpt-3.5-turbo",
       messages: [{
         role: "system",
-        content: "Você é um personal trainer profissional especializado em fitness e nutrição. Forneça respostas detalhadas e personalizadas sobre exercícios, nutrição e bem-estar, mantendo um tom profissional e motivador."
+        content: "Você é um personal trainer profissional especializado em fitness e nutrição. Forneça respostas detalhadas e personalizadas sobre exercícios, nutrição e bem-estar, mantendo um tom profissional e motivador. Responda sempre em português do Brasil."
       }, {
         role: "user",
         content: prompt
@@ -30,11 +26,10 @@ export const askMistral = async (prompt: string): Promise<string> => {
     };
     
     console.log("[ENVIANDO REQUISIÇÃO]", {
-      url: requestUrl,
       body: requestBody
     });
 
-    const response = await fetch(requestUrl, {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -42,51 +37,27 @@ export const askMistral = async (prompt: string): Promise<string> => {
         "HTTP-Referer": "https://fitjourney-app.vercel.app",
         "X-Title": "FitJourney"
       },
-      body: JSON.stringify(requestBody),
-      signal: controller.signal
+      body: JSON.stringify(requestBody)
     });
 
     clearTimeout(timeoutId);
 
-    const responseText = await response.text();
-    console.log("[RESPOSTA BRUTA]:", responseText);
-
     if (!response.ok) {
+      const errorText = await response.text();
       console.error("[ERRO NA API]", {
         status: response.status,
         statusText: response.statusText,
-        error: responseText,
-        headers: Object.fromEntries(response.headers.entries())
+        error: errorText
       });
-
-      if (response.status === 530 || response.status === 502) {
-        return "O serviço está temporariamente indisponível. Por favor, tente novamente em alguns minutos.";
-      }
 
       if (response.status === 401) {
         return "Erro de autenticação. Por favor, verifique as configurações da API.";
       }
 
-      if (response.status === 405) {
-        return "Erro de método HTTP. Por favor, tente novamente em alguns instantes.";
-      }
-
-      throw new Error(`Erro HTTP ${response.status}: ${responseText}`);
+      throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
     }
 
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (error) {
-      console.error("[ERRO NO PARSE]", error);
-      throw new Error("Resposta inválida da API");
-    }
-
-    console.log("[RESPOSTA API]", {
-      status: response.status,
-      headers: Object.fromEntries(response.headers.entries()),
-      data: data
-    });
+    const data = await response.json();
     
     if (!data.choices || !data.choices[0]?.message?.content) {
       console.error("[ERRO NO FORMATO]", data);
@@ -106,10 +77,6 @@ export const askMistral = async (prompt: string): Promise<string> => {
 
     if (error.name === 'AbortError') {
       return "A requisição excedeu o tempo limite. Por favor, tente novamente.";
-    }
-
-    if (error.message.includes('Failed to fetch')) {
-      return "Não foi possível conectar ao serviço. Por favor, verifique sua conexão e tente novamente.";
     }
 
     return `Desculpe, ocorreu um erro ao processar sua pergunta. Por favor, tente novamente. (${error.message})`;
