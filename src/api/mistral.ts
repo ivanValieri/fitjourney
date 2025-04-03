@@ -7,14 +7,11 @@ export const askMistral = async (prompt: string): Promise<string> => {
   }
   
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
-
     const requestBody = {
-      model: "openai/gpt-3.5-turbo",
+      model: "mistralai/mistral-7b-instruct:free",
       messages: [{
         role: "system",
-        content: "Você é um personal trainer profissional especializado em fitness e nutrição. Forneça respostas detalhadas e personalizadas sobre exercícios, nutrição e bem-estar, mantendo um tom profissional e motivador. Responda sempre em português do Brasil."
+        content: "Você é um personal trainer profissional especializado em fitness e nutrição. Forneça respostas detalhadas e personalizadas sobre exercícios, nutrição e bem-estar, mantendo um tom profissional e motivador."
       }, {
         role: "user",
         content: prompt
@@ -35,12 +32,11 @@ export const askMistral = async (prompt: string): Promise<string> => {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${import.meta.env.VITE_MISTRAL_API_KEY}`,
         "HTTP-Referer": "https://fitjourney-app.vercel.app",
-        "X-Title": "FitJourney"
+        "X-Title": "FitJourney",
+        "Origin": "https://fitjourney-app.vercel.app"
       },
       body: JSON.stringify(requestBody)
     });
-
-    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -74,10 +70,6 @@ export const askMistral = async (prompt: string): Promise<string> => {
       request: { prompt },
       timestamp: new Date().toISOString()
     });
-
-    if (error.name === 'AbortError') {
-      return "A requisição excedeu o tempo limite. Por favor, tente novamente.";
-    }
 
     return `Desculpe, ocorreu um erro ao processar sua pergunta. Por favor, tente novamente. (${error.message})`;
   }
