@@ -1,6 +1,9 @@
 // src/api/mistral.ts
+const API_BASE_URL = "https://api.openrouter.ai/api/v1/chat/completions";
+
 export const askMistral = async (prompt: string): Promise<string> => {
-  console.log("=== INICIANDO REQUISIÇÃO MISTRAL ===");
+  console.log("=== INICIANDO REQUISIÇÃO OPENROUTER ===");
+  console.log("URL Base:", API_BASE_URL);
   
   if (!import.meta.env.VITE_MISTRAL_API_KEY) {
     throw new Error("API Key não encontrada");
@@ -18,26 +21,27 @@ export const askMistral = async (prompt: string): Promise<string> => {
       }],
       max_tokens: 800,
       temperature: 0.7,
-      top_p: 0.95,
-      stream: false
+      top_p: 0.95
     };
     
+    const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${import.meta.env.VITE_MISTRAL_API_KEY}`,
+      "HTTP-Referer": "https://fitjourney-app.vercel.app",
+      "X-Title": "FitJourney",
+      "OpenAI-Organization": "org-123abc",
+      "User-Agent": "FitJourney/1.0.0"
+    };
+
     console.log("[ENVIANDO REQUISIÇÃO]", {
+      url: API_BASE_URL,
+      headers: { ...headers, Authorization: "Bearer [REDACTED]" },
       body: requestBody
     });
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const response = await fetch(API_BASE_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${import.meta.env.VITE_MISTRAL_API_KEY}`,
-        "HTTP-Referer": "https://fitjourney-app.vercel.app",
-        "X-Title": "FitJourney",
-        "Origin": "https://fitjourney-app.vercel.app",
-        "Accept": "application/json"
-      },
-      mode: 'cors',
-      credentials: 'omit',
+      headers,
       body: JSON.stringify(requestBody)
     });
 
@@ -47,7 +51,11 @@ export const askMistral = async (prompt: string): Promise<string> => {
         status: response.status,
         statusText: response.statusText,
         error: errorText,
-        headers: Object.fromEntries(response.headers.entries())
+        requestInfo: {
+          url: response.url,
+          method: "POST",
+          headers: Object.fromEntries(response.headers.entries())
+        }
       });
 
       if (response.status === 401) {
@@ -55,24 +63,19 @@ export const askMistral = async (prompt: string): Promise<string> => {
       }
 
       if (response.status === 405) {
-        console.error("[ERRO 405] Headers enviados:", {
-          headers: Object.fromEntries(response.headers.entries()),
-          requestHeaders: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer [REDACTED]",
-            "HTTP-Referer": "https://fitjourney-app.vercel.app",
-            "X-Title": "FitJourney",
-            "Origin": "https://fitjourney-app.vercel.app",
-            "Accept": "application/json"
-          }
+        console.error("[ERRO 405 DETALHADO]", {
+          requestUrl: API_BASE_URL,
+          requestHeaders: headers,
+          responseHeaders: Object.fromEntries(response.headers.entries())
         });
-        return "Erro de método HTTP. Por favor, tente novamente em alguns instantes.";
+        return "Erro de método HTTP. Por favor, aguarde alguns instantes e tente novamente.";
       }
 
       throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
+    console.log("[RESPOSTA]", data);
     
     if (!data.choices || !data.choices[0]?.message?.content) {
       console.error("[ERRO NO FORMATO]", data);
