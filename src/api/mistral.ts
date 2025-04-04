@@ -1,14 +1,14 @@
 // src/api/mistral.ts
-const OPENROUTER_API_URL = import.meta.env.VITE_API_URL;
+const API_URL = "https://api.mistral.ai/v1/chat/completions";
 const APP_URL = "https://fitjourney-app-git-main-ivans-projects-65cdd8ca.vercel.app";
 
 export const askMistral = async (prompt: string): Promise<string> => {
-  console.log("=== INICIANDO REQUISIÇÃO OPENROUTER ===");
+  console.log("=== INICIANDO REQUISIÇÃO MISTRAL ===");
   console.log("Ambiente:", import.meta.env.MODE);
-  console.log("API URL:", OPENROUTER_API_URL);
+  console.log("API URL:", API_URL);
   console.log("App URL:", APP_URL);
   
-  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+  const apiKey = import.meta.env.VITE_MISTRAL_API_KEY;
   if (!apiKey) {
     console.error("API Key não encontrada no ambiente:", import.meta.env);
     throw new Error("API Key não encontrada");
@@ -17,7 +17,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
   
   try {
     const requestBody = {
-      model: "mistralai/mistral-7b-instruct:free",
+      model: "mistral-tiny",
       messages: [{
         role: "system",
         content: "Você é um personal trainer profissional especializado em fitness e nutrição. Forneça respostas detalhadas e personalizadas sobre exercícios, nutrição e bem-estar, mantendo um tom profissional e motivador."
@@ -33,24 +33,15 @@ export const askMistral = async (prompt: string): Promise<string> => {
     
     const headers = {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-      "HTTP-Referer": APP_URL,
-      "X-Title": "FitJourney"
+      "Authorization": `Bearer ${apiKey}`
     };
 
-    console.log("[ENVIANDO REQUISIÇÃO]", {
-      ambiente: import.meta.env.MODE,
-      url: OPENROUTER_API_URL,
-      method: "POST",
-      headers: { 
-        ...headers, 
-        Authorization: "Bearer [REDACTED]" 
-      },
-      body: requestBody
-    });
+    console.log("Enviando requisição para:", API_URL);
+    console.log("Headers:", headers);
+    console.log("Request body:", requestBody);
 
-    // Fazer a requisição diretamente para a API do OpenRouter
-    const response = await fetch(OPENROUTER_API_URL, {
+    // Fazer a requisição diretamente para a API do Mistral
+    const response = await fetch(API_URL, {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody)
@@ -58,40 +49,15 @@ export const askMistral = async (prompt: string): Promise<string> => {
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.log("Raw response:", errorText);
+      
       const errorDetails = {
         status: response.status,
         statusText: response.statusText,
         error: errorText,
-        requestInfo: {
-          ambiente: import.meta.env.MODE,
-          url: response.url,
-          method: "POST",
-          headers: Object.fromEntries(response.headers.entries())
-        }
+        headers: Object.fromEntries(response.headers.entries())
       };
       console.error("[ERRO NA API]", errorDetails);
-
-      if (response.status === 401) {
-        console.error("[ERRO 401] Detalhes:", {
-          apiKeyPresente: !!apiKey,
-          headers: headers
-        });
-        return "Erro de autenticação. Por favor, verifique as configurações da API.";
-      }
-
-      if (response.status === 402) {
-        return "Créditos insuficientes na conta OpenRouter. Por favor, adicione mais créditos em https://openrouter.ai/settings/credits";
-      }
-
-      if (response.status === 405) {
-        console.error("[ERRO 405 DETALHADO]", {
-          ambiente: import.meta.env.MODE,
-          requestUrl: OPENROUTER_API_URL,
-          requestHeaders: headers,
-          responseHeaders: Object.fromEntries(response.headers.entries())
-        });
-        return "Erro de método HTTP. Por favor, aguarde alguns instantes e tente novamente.";
-      }
 
       throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
     }
@@ -112,8 +78,6 @@ export const askMistral = async (prompt: string): Promise<string> => {
       message: error.message,
       stack: error.stack,
       request: { prompt },
-      ambiente: import.meta.env.MODE,
-      apiUrl: OPENROUTER_API_URL,
       timestamp: new Date().toISOString()
     });
 
