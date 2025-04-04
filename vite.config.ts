@@ -4,7 +4,6 @@ import path from 'path';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const isDev = mode === 'development';
 
   return {
     plugins: [react()],
