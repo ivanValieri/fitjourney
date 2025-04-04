@@ -29,8 +29,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
     const headers = {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${import.meta.env.VITE_MISTRAL_API_KEY}`,
-      "HTTP-Referer": APP_URL,
-      "X-Title": "FitJourney"
+      "HTTP-Referer": APP_URL
     };
 
     console.log("[ENVIANDO REQUISIÇÃO]", {
