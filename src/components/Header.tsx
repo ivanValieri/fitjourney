@@ -1,4 +1,3 @@
-import React from 'react';
 import { Dumbbell, User, Bell, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
