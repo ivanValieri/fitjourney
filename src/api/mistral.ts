@@ -31,8 +31,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${import.meta.env.VITE_MISTRAL_API_KEY}`,
       "HTTP-Referer": APP_URL,
-      "X-Title": "FitJourney",
-      "OpenAI-Organization": "org-123abc"
+      "X-Title": "FitJourney"
     };
 
     console.log("[ENVIANDO REQUISIÇÃO]", {
@@ -45,7 +44,8 @@ export const askMistral = async (prompt: string): Promise<string> => {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),
-      mode: "cors"
+      mode: "cors",
+      credentials: "omit"
     });
 
     if (!response.ok) {
