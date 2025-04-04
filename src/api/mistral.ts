@@ -1,10 +1,10 @@
 // src/api/mistral.ts
-const API_URL = new URL("https://openrouter.ai/api/v1/chat/completions");
+const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const APP_URL = "https://fitjourney-app-git-main-ivans-projects-65cdd8ca.vercel.app";
 
 export const askMistral = async (prompt: string): Promise<string> => {
   console.log("=== INICIANDO REQUISIÇÃO OPENROUTER ===");
-  console.log("URL Base:", API_URL.toString());
+  console.log("URL Base:", API_URL);
   console.log("App URL:", APP_URL);
   
   if (!import.meta.env.VITE_MISTRAL_API_KEY) {
@@ -23,25 +23,29 @@ export const askMistral = async (prompt: string): Promise<string> => {
       }],
       max_tokens: 800,
       temperature: 0.7,
-      top_p: 0.95
+      top_p: 0.95,
+      stream: false
     };
     
     const headers = {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${import.meta.env.VITE_MISTRAL_API_KEY}`,
-      "HTTP-Referer": APP_URL
+      "HTTP-Referer": APP_URL,
+      "X-Title": "FitJourney",
+      "OpenAI-Organization": "org-123abc"
     };
 
     console.log("[ENVIANDO REQUISIÇÃO]", {
-      url: API_URL.toString(),
+      url: API_URL,
       headers: { ...headers, Authorization: "Bearer [REDACTED]" },
       body: requestBody
     });
 
-    const response = await fetch(API_URL.toString(), {
+    const response = await fetch(API_URL, {
       method: "POST",
       headers,
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
+      mode: "cors"
     });
 
     if (!response.ok) {
@@ -67,7 +71,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
 
       if (response.status === 405) {
         console.error("[ERRO 405 DETALHADO]", {
-          requestUrl: API_URL.toString(),
+          requestUrl: API_URL,
           requestHeaders: headers,
           responseHeaders: Object.fromEntries(response.headers.entries())
         });
