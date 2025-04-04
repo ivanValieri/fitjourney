@@ -1,11 +1,17 @@
 {
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ],
-  "buildCommand": "npm run build",
+  "buildCommand": "vite build",
+  "devCommand": "vite",
+  "framework": "vite",
+  "installCommand": "npm install",
   "outputDirectory": "dist",
-  "framework": "vite"
+  "routes": [
+    {
+      "src": "/api/v1/chat/completions",
+      "dest": "https://api.mistral.ai/v1/chat/completions"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/"
+    }
+  ]
 } 

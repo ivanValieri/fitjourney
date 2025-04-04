@@ -25,7 +25,6 @@ export default defineConfig(({ mode }) => {
       }
     },
     define: {
-      __API_URL__: JSON.stringify("https://api.mistral.ai/v1/chat/completions"),
       'process.env': {
         ...env,
         VITE_MISTRAL_API_KEY: JSON.stringify(env.VITE_MISTRAL_API_KEY)

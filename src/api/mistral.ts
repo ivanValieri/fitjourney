@@ -1,10 +1,11 @@
 // src/api/mistral.ts
-declare const __API_URL__: string;
+const BASE_URL = import.meta.env.PROD 
+  ? "https://api.mistral.ai"
+  : "";
 
 export const askMistral = async (prompt: string): Promise<string> => {
   console.log("=== INICIANDO REQUISIÇÃO MISTRAL ===");
   console.log("Ambiente:", import.meta.env.MODE);
-  console.log("API URL:", __API_URL__);
   
   const apiKey = import.meta.env.VITE_MISTRAL_API_KEY;
   if (!apiKey) {
@@ -38,15 +39,14 @@ export const askMistral = async (prompt: string): Promise<string> => {
       "Accept": "application/json"
     };
 
-    console.log("Enviando requisição para:", __API_URL__);
+    const endpoint = "/v1/chat/completions";
+    const url = BASE_URL + endpoint;
+
+    console.log("Enviando requisição para:", url);
     console.log("Headers:", headers);
     console.log("Request body:", JSON.stringify(requestBody, null, 2));
 
-    // Garantir que a URL seja absoluta
-    const fullUrl = new URL(__API_URL__);
-    console.log("URL completa:", fullUrl.toString());
-
-    const response = await fetch(fullUrl.toString(), {
+    const response = await fetch(url, {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),
@@ -69,7 +69,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
 
       if (response.status === 405) {
         console.error("[ERRO 405] Detalhes:", {
-          url: fullUrl.toString(),
+          url,
           method: "POST",
           headers: headers,
           body: requestBody
