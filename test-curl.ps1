@@ -1,36 +1,43 @@
 # Configuração
 $apiKey = "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"
-$url = "https://openrouter.ai/api/v1/chat/completions"
+$apiUrl = "https://api.openrouter.ai/api/v1/chat/completions"
 
-# Corpo da requisição em JSON
-$bodyJson = @{
+Write-Host "=== TESTANDO API OPENROUTER ==="
+Write-Host "URL: $apiUrl"
+
+# Criar o arquivo temporário com o corpo da requisição
+$body = @{
     model = "mistralai/mistral-7b-instruct:free"
     messages = @(
         @{
+            role = "system"
+            content = "Você é um personal trainer profissional especializado em fitness e nutrição. Forneça respostas detalhadas e personalizadas sobre exercícios, nutrição e bem-estar, mantendo um tom profissional e motivador."
+        }
+        @{
             role = "user"
-            content = "Diga olá"
+            content = "ola"
         }
     )
-    max_tokens = 100
+    max_tokens = 800
     temperature = 0.7
-} | ConvertTo-Json -Depth 10
+    top_p = 0.95
+    stream = $false
+} | ConvertTo-Json -Compress
 
-Write-Host "Testando API com curl..."
-Write-Host "URL: $url"
-Write-Host "Modelo: mistralai/mistral-7b-instruct:free"
+$tempFile = [System.IO.Path]::GetTempFileName()
+$body | Out-File -FilePath $tempFile -Encoding utf8
 
-# Salvando o corpo em um arquivo temporário
-$bodyJson | Out-File -Encoding utf8 "request.json"
+Write-Host "Testando API..."
+Write-Host "Corpo da requisição:"
+Get-Content $tempFile
 
-# Executando o curl
-Write-Host "`nEnviando requisição..."
-curl.exe -k -v -X POST $url `
-    -H "Content-Type: application/json" `
-    -H "Authorization: Bearer $apiKey" `
-    -H "HTTP-Referer: https://fitjourney-app-git-main-ivans-projects-65cdd8ca.vercel.app" `
-    -H "X-Title: FitJourney" `
-    -H "OpenAI-Organization: org-123abc" `
-    -d "@request.json"
+# Fazer a requisição usando curl
+curl -X POST $apiUrl `
+  -H "Content-Type: application/json" `
+  -H "Authorization: Bearer $apiKey" `
+  -H "HTTP-Referer: https://fitjourney-app-git-main-ivans-projects-65cdd8ca.vercel.app" `
+  -H "X-Title: FitJourney" `
+  -d "@$tempFile"
 
-# Removendo o arquivo temporário
-Remove-Item "request.json" 
+# Remover o arquivo temporário
+Remove-Item $tempFile 
