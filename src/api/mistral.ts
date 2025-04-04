@@ -1,14 +1,18 @@
 // src/api/mistral.ts
-const API_URL = import.meta.env.VITE_API_URL || "/api/v1/chat/completions";
+const apiUrl = import.meta.env.VITE_API_URL;
+if (!apiUrl) {
+  throw new Error("VITE_API_URL não está definida no ambiente");
+}
+
 const APP_URL = "https://fitjourney-app-git-main-ivans-projects-65cdd8ca.vercel.app";
 
 export const askMistral = async (prompt: string): Promise<string> => {
   console.log("=== INICIANDO REQUISIÇÃO OPENROUTER ===");
   console.log("Ambiente:", import.meta.env.MODE);
-  console.log("API URL:", API_URL);
+  console.log("API URL:", apiUrl);
   console.log("App URL:", APP_URL);
   
-  const apiKey = import.meta.env.VITE_MISTRAL_API_KEY;
+  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
   if (!apiKey) {
     console.error("API Key não encontrada no ambiente:", import.meta.env);
     throw new Error("API Key não encontrada");
@@ -40,7 +44,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
 
     console.log("[ENVIANDO REQUISIÇÃO]", {
       ambiente: import.meta.env.MODE,
-      url: API_URL,
+      url: apiUrl,
       method: "POST",
       headers: { 
         ...headers, 
@@ -49,7 +53,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
       body: requestBody
     });
 
-    const response = await fetch(API_URL, {
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody)
@@ -85,7 +89,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
       if (response.status === 405) {
         console.error("[ERRO 405 DETALHADO]", {
           ambiente: import.meta.env.MODE,
-          requestUrl: API_URL,
+          requestUrl: apiUrl,
           requestHeaders: headers,
           responseHeaders: Object.fromEntries(response.headers.entries())
         });
@@ -112,7 +116,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
       stack: error.stack,
       request: { prompt },
       ambiente: import.meta.env.MODE,
-      apiUrl: API_URL,
+      apiUrl: apiUrl,
       timestamp: new Date().toISOString()
     });
 

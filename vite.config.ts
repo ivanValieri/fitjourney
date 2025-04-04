@@ -30,7 +30,11 @@ export default defineConfig(({ mode }) => {
       })
     },
     define: {
-      'process.env': env
+      'process.env': {
+        ...env,
+        VITE_API_URL: JSON.stringify(env.VITE_API_URL),
+        VITE_OPENROUTER_API_KEY: JSON.stringify(env.VITE_OPENROUTER_API_KEY)
+      }
     }
   };
 });
