@@ -46,10 +46,10 @@ export const askMistral = async (prompt: string): Promise<string> => {
     const fullUrl = new URL(API_URL);
     console.log("URL completa:", fullUrl.toString());
 
+    // Tentar método GET
     const response = await fetch(fullUrl.toString(), {
-      method: "POST",
+      method: "GET",
       headers,
-      body: JSON.stringify(requestBody),
       signal: controller.signal
     });
 
@@ -70,9 +70,8 @@ export const askMistral = async (prompt: string): Promise<string> => {
       if (response.status === 405) {
         console.error("[ERRO 405] Detalhes:", {
           url: fullUrl.toString(),
-          method: "POST",
-          headers: headers,
-          body: requestBody
+          method: "GET",
+          headers: headers
         });
         return "Erro de método HTTP. Por favor, verifique a configuração da API.";
       }
