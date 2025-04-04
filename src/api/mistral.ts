@@ -39,7 +39,11 @@ export const askMistral = async (prompt: string): Promise<string> => {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey}`,
       "HTTP-Referer": APP_URL,
-      "X-Title": "FitJourney"
+      "X-Title": "FitJourney",
+      // Headers CORS
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, HTTP-Referer, X-Title"
     };
 
     console.log("[ENVIANDO REQUISIÇÃO]", {
@@ -53,6 +57,21 @@ export const askMistral = async (prompt: string): Promise<string> => {
       body: requestBody
     });
 
+    // Primeiro, fazer uma requisição OPTIONS para verificar CORS
+    const optionsResponse = await fetch(apiUrl, {
+      method: "OPTIONS",
+      headers: {
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "Content-Type, Authorization, HTTP-Referer, X-Title"
+      }
+    });
+
+    console.log("[RESPOSTA OPTIONS]", {
+      status: optionsResponse.status,
+      headers: Object.fromEntries(optionsResponse.headers.entries())
+    });
+
+    // Agora fazer a requisição POST
     const response = await fetch(apiUrl, {
       method: "POST",
       headers,
