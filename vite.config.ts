@@ -15,24 +15,11 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 3000,
-      host: true,
-      ...(isDev && {
-        proxy: {
-          '/api': {
-            target: 'https://openrouter.ai',
-            changeOrigin: true,
-            secure: false,
-            headers: {
-              'Origin': 'https://fitjourney-app-git-main-ivans-projects-65cdd8ca.vercel.app'
-            }
-          }
-        }
-      })
+      host: true
     },
     define: {
       'process.env': {
         ...env,
-        VITE_API_URL: JSON.stringify(env.VITE_API_URL),
         VITE_OPENROUTER_API_KEY: JSON.stringify(env.VITE_OPENROUTER_API_KEY)
       }
     }

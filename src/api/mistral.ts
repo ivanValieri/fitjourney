@@ -1,11 +1,11 @@
 // src/api/mistral.ts
-const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
+const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const APP_URL = "https://fitjourney-app-git-main-ivans-projects-65cdd8ca.vercel.app";
 
 export const askMistral = async (prompt: string): Promise<string> => {
   console.log("=== INICIANDO REQUISIÇÃO OPENROUTER ===");
   console.log("Ambiente:", import.meta.env.MODE);
-  console.log("API URL:", apiUrl);
+  console.log("API URL:", OPENROUTER_API_URL);
   console.log("App URL:", APP_URL);
   
   const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
@@ -40,7 +40,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
 
     console.log("[ENVIANDO REQUISIÇÃO]", {
       ambiente: import.meta.env.MODE,
-      url: apiUrl,
+      url: OPENROUTER_API_URL,
       method: "POST",
       headers: { 
         ...headers, 
@@ -49,7 +49,8 @@ export const askMistral = async (prompt: string): Promise<string> => {
       body: requestBody
     });
 
-    const response = await fetch(apiUrl, {
+    // Fazer a requisição diretamente para a API do OpenRouter
+    const response = await fetch(OPENROUTER_API_URL, {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody)
@@ -85,7 +86,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
       if (response.status === 405) {
         console.error("[ERRO 405 DETALHADO]", {
           ambiente: import.meta.env.MODE,
-          requestUrl: apiUrl,
+          requestUrl: OPENROUTER_API_URL,
           requestHeaders: headers,
           responseHeaders: Object.fromEntries(response.headers.entries())
         });
@@ -112,7 +113,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
       stack: error.stack,
       request: { prompt },
       ambiente: import.meta.env.MODE,
-      apiUrl: apiUrl,
+      apiUrl: OPENROUTER_API_URL,
       timestamp: new Date().toISOString()
     });
 
