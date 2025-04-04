@@ -13,7 +13,15 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 3000,
-      host: true
+      host: true,
+      proxy: {
+        '/api': {
+          target: 'https://openrouter.ai',
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/api/, '')
+        }
+      }
     },
     define: {
       'process.env': env
