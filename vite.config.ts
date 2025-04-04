@@ -19,7 +19,8 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env': {
         ...env,
-        VITE_OPENROUTER_API_KEY: JSON.stringify(env.VITE_OPENROUTER_API_KEY)
+        VITE_MISTRAL_API_KEY: JSON.stringify(env.VITE_MISTRAL_API_KEY),
+        VITE_API_URL: JSON.stringify("https://api.mistral.ai/v1/chat/completions")
       }
     }
   };

@@ -42,7 +42,11 @@ export const askMistral = async (prompt: string): Promise<string> => {
     console.log("Headers:", headers);
     console.log("Request body:", JSON.stringify(requestBody, null, 2));
 
-    const response = await fetch(API_URL, {
+    // Garantir que a URL seja absoluta
+    const fullUrl = new URL(API_URL);
+    console.log("URL completa:", fullUrl.toString());
+
+    const response = await fetch(fullUrl.toString(), {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),
@@ -65,7 +69,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
 
       if (response.status === 405) {
         console.error("[ERRO 405] Detalhes:", {
-          url: API_URL,
+          url: fullUrl.toString(),
           method: "POST",
           headers: headers,
           body: requestBody
