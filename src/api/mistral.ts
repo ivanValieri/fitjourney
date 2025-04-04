@@ -34,7 +34,8 @@ export const askMistral = async (prompt: string): Promise<string> => {
     
     const headers = {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`
+      "Authorization": `Bearer ${apiKey}`,
+      "Accept": "application/json"
     };
 
     console.log("Enviando requisição para:", API_URL);
@@ -61,6 +62,16 @@ export const askMistral = async (prompt: string): Promise<string> => {
         headers: Object.fromEntries(response.headers.entries())
       };
       console.error("[ERRO NA API]", errorDetails);
+
+      if (response.status === 405) {
+        console.error("[ERRO 405] Detalhes:", {
+          url: API_URL,
+          method: "POST",
+          headers: headers,
+          body: requestBody
+        });
+        return "Erro de método HTTP. Por favor, verifique a configuração da API.";
+      }
 
       if (response.status === 530 || response.status === 502) {
         return "O serviço está temporariamente indisponível. Por favor, tente novamente em alguns minutos.";
