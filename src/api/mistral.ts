@@ -1,5 +1,5 @@
 // src/api/mistral.ts
-const apiUrl = import.meta.env.VITE_API_URL || "https://api.openrouter.ai/api/v1/chat/completions";
+const apiUrl = import.meta.env.VITE_API_URL;
 if (!apiUrl) {
   throw new Error("VITE_API_URL não está definida no ambiente");
 }
@@ -42,12 +42,9 @@ export const askMistral = async (prompt: string): Promise<string> => {
       "X-Title": "FitJourney"
     };
 
-    // Garante que a URL é absoluta
-    const absoluteUrl = apiUrl.startsWith("http") ? apiUrl : `https://api.openrouter.ai${apiUrl}`;
-
     console.log("[ENVIANDO REQUISIÇÃO]", {
       ambiente: import.meta.env.MODE,
-      url: absoluteUrl,
+      url: apiUrl,
       method: "POST",
       headers: { 
         ...headers, 
@@ -56,7 +53,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
       body: requestBody
     });
 
-    const response = await fetch(absoluteUrl, {
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody)
@@ -92,7 +89,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
       if (response.status === 405) {
         console.error("[ERRO 405 DETALHADO]", {
           ambiente: import.meta.env.MODE,
-          requestUrl: absoluteUrl,
+          requestUrl: apiUrl,
           requestHeaders: headers,
           responseHeaders: Object.fromEntries(response.headers.entries())
         });
