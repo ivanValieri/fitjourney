@@ -4,6 +4,7 @@ import path from 'path';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  const isProd = mode === 'production';
 
   return {
     plugins: [react()],
@@ -16,11 +17,18 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       host: true
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: undefined
+        }
+      }
+    },
     define: {
+      __API_URL__: JSON.stringify("https://api.mistral.ai/v1/chat/completions"),
       'process.env': {
         ...env,
-        VITE_MISTRAL_API_KEY: JSON.stringify(env.VITE_MISTRAL_API_KEY),
-        VITE_API_URL: JSON.stringify("https://api.mistral.ai/v1/chat/completions")
+        VITE_MISTRAL_API_KEY: JSON.stringify(env.VITE_MISTRAL_API_KEY)
       }
     }
   };
