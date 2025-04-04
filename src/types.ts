@@ -137,7 +137,7 @@ export interface UserProfile {
   workoutHistory?: WorkoutHistory[];
   achievements?: Achievement[];
   customWorkouts?: Exercise[];
-  favorites?: string[];
+  favorites: string[];
   themePreferences?: ThemePreferences;
   chatHistory?: ChatHistory;
 }

@@ -1,5 +1,5 @@
 import Chatbot from './components/Chatbot';
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import Header from './components/Header';
 import ProfileSetup from './components/ProfileSetup';
@@ -291,33 +291,37 @@ function App() {
 
   const handleToggleFavorite = async (exerciseId: string) => {
     if (!userProfile || !session?.user?.id) {
-      toast.error('Erro: Usuário não autenticado.');
+      toast.error('Você precisa estar logado para favoritar exercícios.');
       return;
     }
 
-    const currentFavorites = userProfile.favorites || [];
-    const isCurrentlyFavorite = currentFavorites.includes(exerciseId);
-    const updatedFavorites = isCurrentlyFavorite
-      ? currentFavorites.filter((id) => id !== exerciseId)
-      : [...currentFavorites, exerciseId];
+    const isCurrentlyFavorite = userProfile.favorites.includes(exerciseId);
+    const newFavorites = isCurrentlyFavorite
+      ? userProfile.favorites.filter(id => id !== exerciseId)
+      : [...userProfile.favorites, exerciseId];
 
-    // Atualizar o perfil no Supabase
-    const { error } = await supabase
-      .from('profiles')
-      .update({ favorites: updatedFavorites })
-      .eq('user_id', session.user.id);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ favorites: newFavorites })
+        .eq('user_id', session.user.id);
 
-    if (error) {
-      console.error('Erro ao atualizar favoritos:', error.message);
+      if (error) {
+        console.error('Erro ao atualizar favoritos:', error.message);
+        toast.error('Erro ao atualizar favoritos.');
+        return;
+      }
+
+      setUserProfile(prev => {
+        if (!prev) return null;
+        return { ...prev, favorites: newFavorites };
+      });
+      
+      toast.success(isCurrentlyFavorite ? 'Removido dos favoritos!' : 'Adicionado aos favoritos!');
+    } catch (err) {
+      console.error('Erro ao atualizar favoritos:', err);
       toast.error('Erro ao atualizar favoritos.');
-      return;
     }
-
-    // Atualizar o estado local
-    setUserProfile({ ...userProfile, favorites: updatedFavorites });
-    toast.success(
-      isCurrentlyFavorite ? 'Removido dos favoritos!' : 'Adicionado aos favoritos!'
-    );
   };
 
   const adjustedExercises = useMemo(() => {
@@ -386,45 +390,35 @@ function App() {
 
   const handleProfileComplete = async (profile: UserProfile) => {
     if (!session?.user?.id) {
-      console.error('Nenhum usuário autenticado encontrado.');
       toast.error('Erro: Usuário não autenticado.');
       return;
     }
 
-    const profileData = {
+    const newProfile = {
       ...profile,
       user_id: session.user.id,
       created_at: new Date().toISOString(),
-      progress: profile.progress || { totalCaloriesBurned: 0, workoutsCompleted: 0 },
-      workoutHistory: profile.workoutHistory || [],
-      achievements: profile.achievements && profile.achievements.length > 0 ? profile.achievements : ACHIEVEMENTS,
-      favorites: profile.favorites || [],
+      progress: { totalCaloriesBurned: 0, workoutsCompleted: 0 },
+      workoutHistory: [],
+      achievements: ACHIEVEMENTS,
+      customWorkouts: [],
+      favorites: [],
+      imc: profile.weight / ((profile.height / 100) * (profile.height / 100))
     };
 
-    console.log('Tentando inserir perfil:', profileData);
-
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('profiles')
-      .insert([profileData])
-      .select()
-      .single();
+      .insert([newProfile]);
 
     if (error) {
-      console.error('Erro ao salvar perfil:', error.message);
-      if (error.code === '42P01') {
-        toast.error('Tabela "profiles" não existe. Contate o suporte.');
-      } else {
-        toast.error(`Erro ao salvar perfil: ${error.message}`);
-      }
+      console.error('Erro ao criar perfil:', error.message);
+      toast.error('Erro ao criar perfil.');
       return;
     }
 
-    if (data) {
-      console.log('Perfil salvo com sucesso:', data);
-      setUserProfile(data);
-      setShowProfileSetup(false);
-      toast.success('Perfil configurado com sucesso!');
-    }
+    setUserProfile(newProfile);
+    setShowProfileSetup(false);
+    toast.success('Perfil criado com sucesso!');
   };
 
   console.log('Estado atual:', { session, userProfile, showProfileSetup, showEditProfile });

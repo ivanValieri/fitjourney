@@ -1,5 +1,5 @@
 // src/api/mistral.ts
-const API_URL = "https://openrouter.ai/api/v1/chat/completions";
+const API_URL = "/api/v1/chat/completions";
 const APP_URL = "https://fitjourney-app-git-main-ivans-projects-65cdd8ca.vercel.app";
 
 export const askMistral = async (prompt: string): Promise<string> => {
@@ -31,7 +31,8 @@ export const askMistral = async (prompt: string): Promise<string> => {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${import.meta.env.VITE_MISTRAL_API_KEY}`,
       "HTTP-Referer": APP_URL,
-      "X-Title": "FitJourney"
+      "X-Title": "FitJourney",
+      "OpenAI-Organization": "org-123abc"
     };
 
     console.log("[ENVIANDO REQUISIÇÃO]", {
@@ -43,9 +44,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
     const response = await fetch(API_URL, {
       method: "POST",
       headers,
-      body: JSON.stringify(requestBody),
-      mode: "cors",
-      credentials: "omit"
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {

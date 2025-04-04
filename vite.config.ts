@@ -19,7 +19,9 @@ export default defineConfig(({ mode }) => {
           target: 'https://openrouter.ai',
           changeOrigin: true,
           secure: false,
-          rewrite: (path) => path.replace(/^\/api/, '')
+          headers: {
+            'Origin': 'https://fitjourney-app-git-main-ivans-projects-65cdd8ca.vercel.app'
+          }
         }
       }
     },
