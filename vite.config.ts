@@ -4,6 +4,8 @@ import path from 'path';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  const isDev = mode === 'development';
+
   return {
     plugins: [react()],
     resolve: {
@@ -14,16 +16,18 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       host: true,
-      proxy: {
-        '/api': {
-          target: 'https://openrouter.ai',
-          changeOrigin: true,
-          secure: false,
-          headers: {
-            'Origin': 'https://fitjourney-app-git-main-ivans-projects-65cdd8ca.vercel.app'
+      ...(isDev && {
+        proxy: {
+          '/api': {
+            target: 'https://openrouter.ai',
+            changeOrigin: true,
+            secure: false,
+            headers: {
+              'Origin': 'https://fitjourney-app-git-main-ivans-projects-65cdd8ca.vercel.app'
+            }
           }
         }
-      }
+      })
     },
     define: {
       'process.env': env

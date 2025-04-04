@@ -1,15 +1,22 @@
 // src/api/mistral.ts
-const API_URL = "/api/v1/chat/completions";
+const API_URL = import.meta.env.PROD
+  ? "https://openrouter.ai/api/v1/chat/completions"
+  : "/api/v1/chat/completions";
+
 const APP_URL = "https://fitjourney-app-git-main-ivans-projects-65cdd8ca.vercel.app";
 
 export const askMistral = async (prompt: string): Promise<string> => {
   console.log("=== INICIANDO REQUISIÇÃO OPENROUTER ===");
+  console.log("Ambiente:", import.meta.env.MODE);
   console.log("URL Base:", API_URL);
   console.log("App URL:", APP_URL);
   
-  if (!import.meta.env.VITE_MISTRAL_API_KEY) {
+  const apiKey = import.meta.env.VITE_MISTRAL_API_KEY;
+  if (!apiKey) {
+    console.error("API Key não encontrada no ambiente:", import.meta.env);
     throw new Error("API Key não encontrada");
   }
+  console.log("API Key presente:", !!apiKey);
   
   try {
     const requestBody = {
@@ -29,15 +36,18 @@ export const askMistral = async (prompt: string): Promise<string> => {
     
     const headers = {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${import.meta.env.VITE_MISTRAL_API_KEY}`,
+      "Authorization": `Bearer ${apiKey}`,
       "HTTP-Referer": APP_URL,
-      "X-Title": "FitJourney",
-      "OpenAI-Organization": "org-123abc"
+      "X-Title": "FitJourney"
     };
 
     console.log("[ENVIANDO REQUISIÇÃO]", {
       url: API_URL,
-      headers: { ...headers, Authorization: "Bearer [REDACTED]" },
+      method: "POST",
+      headers: { 
+        ...headers, 
+        Authorization: "Bearer [REDACTED]" 
+      },
       body: requestBody
     });
 
@@ -49,7 +59,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("[ERRO NA API]", {
+      const errorDetails = {
         status: response.status,
         statusText: response.statusText,
         error: errorText,
@@ -58,9 +68,14 @@ export const askMistral = async (prompt: string): Promise<string> => {
           method: "POST",
           headers: Object.fromEntries(response.headers.entries())
         }
-      });
+      };
+      console.error("[ERRO NA API]", errorDetails);
 
       if (response.status === 401) {
+        console.error("[ERRO 401] Detalhes:", {
+          apiKeyPresente: !!apiKey,
+          headers: headers
+        });
         return "Erro de autenticação. Por favor, verifique as configurações da API.";
       }
 
@@ -70,6 +85,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
 
       if (response.status === 405) {
         console.error("[ERRO 405 DETALHADO]", {
+          ambiente: import.meta.env.MODE,
           requestUrl: API_URL,
           requestHeaders: headers,
           responseHeaders: Object.fromEntries(response.headers.entries())
@@ -96,6 +112,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
       message: error.message,
       stack: error.stack,
       request: { prompt },
+      ambiente: import.meta.env.MODE,
       timestamp: new Date().toISOString()
     });
 
