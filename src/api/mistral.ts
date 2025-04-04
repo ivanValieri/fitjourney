@@ -1,6 +1,7 @@
 // src/api/mistral.ts
-const API_URL = import.meta.env.PROD
-  ? "https://openrouter.ai/api/v1/chat/completions"
+const isProd = import.meta.env.MODE === "production";
+const API_URL = isProd
+  ? "https://api.openrouter.ai/api/v1/chat/completions"
   : "/api/v1/chat/completions";
 
 const APP_URL = "https://fitjourney-app-git-main-ivans-projects-65cdd8ca.vercel.app";
@@ -42,6 +43,8 @@ export const askMistral = async (prompt: string): Promise<string> => {
     };
 
     console.log("[ENVIANDO REQUISIÇÃO]", {
+      ambiente: import.meta.env.MODE,
+      isProd,
       url: API_URL,
       method: "POST",
       headers: { 
@@ -64,6 +67,8 @@ export const askMistral = async (prompt: string): Promise<string> => {
         statusText: response.statusText,
         error: errorText,
         requestInfo: {
+          ambiente: import.meta.env.MODE,
+          isProd,
           url: response.url,
           method: "POST",
           headers: Object.fromEntries(response.headers.entries())
@@ -86,6 +91,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
       if (response.status === 405) {
         console.error("[ERRO 405 DETALHADO]", {
           ambiente: import.meta.env.MODE,
+          isProd,
           requestUrl: API_URL,
           requestHeaders: headers,
           responseHeaders: Object.fromEntries(response.headers.entries())
@@ -113,6 +119,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
       stack: error.stack,
       request: { prompt },
       ambiente: import.meta.env.MODE,
+      isProd,
       timestamp: new Date().toISOString()
     });
 
