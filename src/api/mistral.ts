@@ -3,7 +3,7 @@ const MISTRAL_API_URL = import.meta.env.VITE_MISTRAL_API_URL || "https://api.mis
 const MISTRAL_MODEL = import.meta.env.VITE_MISTRAL_MODEL || "mistral-tiny";
 
 export const askMistral = async (prompt: string): Promise<string> => {
-  console.log("=== INICIANDO REQUISIÇÃO MISTRAL ===");
+  console.log("=== INICIANDO REQUISIÇÃO MISTRAL (WEBHOOK TEST) ===");
   console.log("Ambiente:", import.meta.env.MODE);
   console.log("API URL:", MISTRAL_API_URL);
   console.log("Modelo:", MISTRAL_MODEL);
