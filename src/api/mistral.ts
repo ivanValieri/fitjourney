@@ -1,11 +1,10 @@
 // src/api/mistral.ts
-const BASE_URL = import.meta.env.PROD 
-  ? "https://api.mistral.ai"
-  : "";
+const MISTRAL_API_URL = "https://api.mistral.ai/v1/chat/completions";
 
 export const askMistral = async (prompt: string): Promise<string> => {
   console.log("=== INICIANDO REQUISIÇÃO MISTRAL ===");
   console.log("Ambiente:", import.meta.env.MODE);
+  console.log("API URL:", MISTRAL_API_URL);
   
   const apiKey = import.meta.env.VITE_MISTRAL_API_KEY;
   if (!apiKey) {
@@ -35,18 +34,17 @@ export const askMistral = async (prompt: string): Promise<string> => {
     
     const headers = {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-      "Accept": "application/json"
+      "Authorization": `Bearer ${apiKey}`
     };
 
-    const endpoint = "/v1/chat/completions";
-    const url = BASE_URL + endpoint;
-
-    console.log("Enviando requisição para:", url);
-    console.log("Headers:", headers);
+    console.log("Enviando requisição para:", MISTRAL_API_URL);
+    console.log("Headers:", {
+      ...headers,
+      Authorization: "Bearer [REDACTED]"
+    });
     console.log("Request body:", JSON.stringify(requestBody, null, 2));
 
-    const response = await fetch(url, {
+    const response = await fetch(MISTRAL_API_URL, {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),
@@ -69,10 +67,12 @@ export const askMistral = async (prompt: string): Promise<string> => {
 
       if (response.status === 405) {
         console.error("[ERRO 405] Detalhes:", {
-          url,
+          url: MISTRAL_API_URL,
           method: "POST",
-          headers: headers,
-          body: requestBody
+          headers: {
+            ...headers,
+            Authorization: "Bearer [REDACTED]"
+          }
         });
         return "Erro de método HTTP. Por favor, verifique a configuração da API.";
       }

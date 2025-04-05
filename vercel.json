@@ -6,10 +6,6 @@
   "outputDirectory": "dist",
   "routes": [
     {
-      "src": "/api/v1/chat/completions",
-      "dest": "https://api.mistral.ai/v1/chat/completions"
-    },
-    {
       "src": "/(.*)",
       "dest": "/"
     }
