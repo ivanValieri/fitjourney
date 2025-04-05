@@ -9,5 +9,14 @@
       "src": "/(.*)",
       "dest": "/"
     }
-  ]
+  ],
+  "env": {
+    "VITE_MISTRAL_API_URL": "https://api.mistral.ai/v1/chat/completions",
+    "VITE_MISTRAL_MODEL": "mistral-tiny"
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  }
 } 

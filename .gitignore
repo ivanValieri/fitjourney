@@ -24,12 +24,13 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment variables
+# Environment files
 .env
 .env.local
 .env.development.local
 .env.test.local
-.env.production.local
+# Do not ignore production env file
+#.env.production
 
 # Build
 build/
