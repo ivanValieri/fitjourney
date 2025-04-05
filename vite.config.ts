@@ -27,7 +27,9 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env': {
         ...env,
-        VITE_MISTRAL_API_KEY: JSON.stringify(env.VITE_MISTRAL_API_KEY)
+        VITE_MISTRAL_API_KEY: JSON.stringify(env.VITE_MISTRAL_API_KEY),
+        VITE_MISTRAL_API_URL: JSON.stringify(env.VITE_MISTRAL_API_URL),
+        VITE_MISTRAL_MODEL: JSON.stringify(env.VITE_MISTRAL_MODEL)
       }
     }
   };

@@ -1,10 +1,12 @@
 // src/api/mistral.ts
-const MISTRAL_API_URL = "https://api.mistral.ai/v1/chat/completions";
+const MISTRAL_API_URL = import.meta.env.VITE_MISTRAL_API_URL || "https://api.mistral.ai/v1/chat/completions";
+const MISTRAL_MODEL = import.meta.env.VITE_MISTRAL_MODEL || "mistral-tiny";
 
 export const askMistral = async (prompt: string): Promise<string> => {
   console.log("=== INICIANDO REQUISIÇÃO MISTRAL ===");
   console.log("Ambiente:", import.meta.env.MODE);
   console.log("API URL:", MISTRAL_API_URL);
+  console.log("Modelo:", MISTRAL_MODEL);
   
   const apiKey = import.meta.env.VITE_MISTRAL_API_KEY;
   if (!apiKey) {
@@ -18,7 +20,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
     const timeout = setTimeout(() => controller.abort(), 30000);
 
     const requestBody = {
-      model: "mistral-tiny",
+      model: MISTRAL_MODEL,
       messages: [{
         role: "system",
         content: "Você é um personal trainer profissional especializado em fitness e nutrição. Forneça respostas detalhadas e personalizadas sobre exercícios, nutrição e bem-estar, mantendo um tom profissional e motivador."
@@ -34,7 +36,9 @@ export const askMistral = async (prompt: string): Promise<string> => {
     
     const headers = {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`
+      "Authorization": `Bearer ${apiKey}`,
+      "Accept": "application/json",
+      "Origin": window.location.origin
     };
 
     console.log("Enviando requisição para:", MISTRAL_API_URL);
@@ -48,7 +52,8 @@ export const askMistral = async (prompt: string): Promise<string> => {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),
-      signal: controller.signal
+      signal: controller.signal,
+      mode: "cors"
     });
 
     clearTimeout(timeout);
