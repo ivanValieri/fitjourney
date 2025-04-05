@@ -4,7 +4,8 @@ const MISTRAL_API_URL = "https://api.mistral.ai/v1/chat/completions";
 const MISTRAL_MODEL = import.meta.env.VITE_MISTRAL_MODEL || "mistral-tiny";
 
 export const askMistral = async (prompt: string): Promise<string> => {
-  console.log("=== INICIANDO REQUISIÇÃO MISTRAL (WEBHOOK TEST) ===");
+  console.log("=== INICIANDO NOVA REQUISIÇÃO MISTRAL - V2 ===");
+  console.log("Versão atual: 05/04/2024");
   console.log("Ambiente:", import.meta.env.MODE);
   console.log("API URL:", MISTRAL_API_URL);
   console.log("Modelo:", MISTRAL_MODEL);
