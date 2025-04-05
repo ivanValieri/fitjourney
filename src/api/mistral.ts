@@ -1,5 +1,6 @@
 // src/api/mistral.ts
-const MISTRAL_API_URL = import.meta.env.VITE_MISTRAL_API_URL || "https://api.mistral.ai/v1/chat/completions";
+// TEST WEBHOOK DEPLOYMENT - VERCEL AUTO DEPLOY
+const MISTRAL_API_URL = "https://api.mistral.ai/v1/chat/completions";
 const MISTRAL_MODEL = import.meta.env.VITE_MISTRAL_MODEL || "mistral-tiny";
 
 export const askMistral = async (prompt: string): Promise<string> => {
