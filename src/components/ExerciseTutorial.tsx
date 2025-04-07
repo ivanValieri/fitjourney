@@ -245,24 +245,32 @@ export default function ExerciseTutorial({ exercise, onClose }: ExerciseTutorial
           </div>
 
           {/* Dicas de Nutrição */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="bg-green-50 p-4 rounded-xl">
-              <h4 className="font-semibold text-green-800 mb-2">Nutrição Pré-treino</h4>
-              <ul className="list-disc pl-4 space-y-1">
-                {exercise.nutrition?.before?.map((item, index) => (
-                  <li key={index} className="mb-2">{item}</li>
-                ))}
-              </ul>
+          {exercise.nutrition && (
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold mb-2 flex items-center">
+                <Apple className="h-5 w-5 mr-2" />
+                Nutrição
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-medium mb-1">Pré-treino:</h4>
+                  <ul className="list-disc list-inside">
+                    {exercise.nutrition.preTreino?.map((item: string, index: number) => (
+                      <li key={index} className="text-gray-600">{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-1">Pós-treino:</h4>
+                  <ul className="list-disc list-inside">
+                    {exercise.nutrition.posTreino?.map((item: string, index: number) => (
+                      <li key={index} className="text-gray-600">{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
-            <div className="bg-purple-50 p-4 rounded-xl">
-              <h4 className="font-semibold text-purple-800 mb-2">Nutrição Pós-treino</h4>
-              <ul className="list-disc pl-4 space-y-1">
-                {exercise.nutrition?.after?.map((item, index) => (
-                  <li key={index} className="mb-2">{item}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

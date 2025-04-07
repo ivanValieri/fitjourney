@@ -14,6 +14,23 @@ export type Exercise = {
   duration?: number;
   calories?: number;
   steps?: string[];
+  imageUrl?: string;
+  difficulty?: string;
+  muscleGroup?: string;
+  suitableFor?: {
+    imcRange?: {
+      min?: number;
+      max?: number;
+    };
+    ageRange?: {
+      min?: number;
+      max?: number;
+    };
+  };
+  modifications?: {
+    easier?: string[];
+    harder?: string[];
+  };
 };
 
 export type UserProfile = {

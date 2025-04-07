@@ -1,11 +1,12 @@
 // teste para git
 // santos the best
 // neymar
+// gol
 
 
 import { useState } from 'react';
 import { X, Plus } from 'lucide-react';
-import type { Exercise } from '../types/index';
+import type { Exercise } from '../types';
 import toast from 'react-hot-toast';
 
 interface CreateWorkoutModalProps {
@@ -45,7 +46,9 @@ const CreateWorkoutModal: React.FC<CreateWorkoutModalProps> = ({ onClose, onCrea
       id: `custom-${Date.now()}`,
       name,
       description: steps.join('\n'),
-      equipment: [] as string[],
+      duration,
+      calories,
+      steps,
       tips: [] as string[],
       commonMistakes: [] as string[],
       targetMuscles: [] as string[],
@@ -54,9 +57,23 @@ const CreateWorkoutModal: React.FC<CreateWorkoutModalProps> = ({ onClose, onCrea
         preTreino: [] as string[],
         posTreino: [] as string[]
       },
-      duration,
-      calories,
-      steps
+      imageUrl: '',
+      difficulty: 'beginner',
+      muscleGroup: '',
+      suitableFor: {
+        imcRange: {
+          min: 0,
+          max: 100
+        },
+        ageRange: {
+          min: 0,
+          max: 100
+        }
+      },
+      modifications: {
+        easier: [] as string[],
+        harder: [] as string[]
+      }
     } satisfies Exercise;
 
     onCreate(newWorkout);

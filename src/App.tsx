@@ -265,28 +265,15 @@ function App() {
     setUserProfile(updatedProfile);
   };
 
-  const handleCreateWorkout = async (newWorkout: Exercise) => {
-    if (!userProfile || !session?.user?.id) {
-      toast.error('Erro: Usuário não autenticado.');
-      return;
+  const handleCreateWorkout = (workout: Exercise) => {
+    try {
+      // Lógica síncrona aqui
+      setUserProfile(prev => ({ ...prev, customWorkouts: [...(prev?.customWorkouts || []), workout] }));
+      toast.success('Treino criado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao criar treino:', error);
+      toast.error('Erro ao criar treino');
     }
-
-    const updatedCustomWorkouts = [...(userProfile.customWorkouts || []), newWorkout];
-
-    // Atualizar o perfil no Supabase
-    const { error } = await supabase
-      .from('profiles')
-      .update({ customWorkouts: updatedCustomWorkouts })
-      .eq('user_id', session.user.id);
-
-    if (error) {
-      console.error('Erro ao salvar treino personalizado:', error.message);
-      toast.error('Erro ao criar treino.');
-      return;
-    }
-
-    // Atualizar o estado local
-    setUserProfile({ ...userProfile, customWorkouts: updatedCustomWorkouts });
   };
 
   const handleToggleFavorite = async (exerciseId: string) => {
@@ -714,7 +701,7 @@ function App() {
       </main>
 
       {selectedExercise && (
-        <ExerciseTutorial exercise={selectedExercise} onClose={() => setSelectedExercise(null)} />
+        <ExerciseTutorial exercise={selectedExercise} onClose={() => setSelectedExercise(undefined)} />
       )}
       {showProgress && (
         <ProgressModal
