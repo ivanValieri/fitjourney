@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { UserProfile, Goal, RecommendedPlan } from '../types';
-import { ChevronRight, User2, Target, Clock, Scale, Ruler } from 'lucide-react';
+import { ChevronRight, User2, Scale, Ruler } from 'lucide-react';
 
 interface ProfileSetupProps {
   onComplete: (profile: UserProfile) => void;
@@ -13,7 +13,6 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
     type: "weight-loss",
     intensity: "moderate"
   });
-  const [recommendedPlan, setRecommendedPlan] = useState<RecommendedPlan | undefined>(undefined);
 
   const calculateIMC = (weight: number, height: number): number => {
     const heightInMeters = height / 100;
@@ -128,12 +127,12 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
     e.preventDefault();
     if (isProfileComplete()) {
       const imc = calculateIMC(profile.weight!, profile.height!);
-      const recommendedPlan = generateRecommendedPlan(profile);
+      const plan = generateRecommendedPlan(profile);
       
       const finalProfile: UserProfile = {
         ...profile as UserProfile,
         imc,
-        recommendedPlan,
+        recommendedPlan: plan,
       };
       
       onComplete(finalProfile);
