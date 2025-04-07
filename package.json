@@ -9,7 +9,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "vercel-build": "vite build",
-    "clean": "rm -rf dist .vercel"
+    "clean": "rm -rf dist .vercel",
+    "tailwind:watch": "tailwindcss -i ./src/index.css -o ./src/output.css --watch"
   },
   "dependencies": {
     "@react-spring/web": "^9.7.3",
@@ -30,9 +31,13 @@
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "@typescript-eslint/parser": "^7.0.2",
     "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "10.4.21",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "postcss": "8.5.3",
+    "tailwindcss": "4.1.3",
+    "tailwindcss-cli": "0.1.2",
     "typescript": "^5.2.2",
     "vite": "^5.1.4"
   }
