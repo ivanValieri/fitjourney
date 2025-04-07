@@ -1,4 +1,3 @@
-import React from 'react';
 import { Exercise } from '../types';
 import { Clock, Flame, Dumbbell, Heart } from 'lucide-react';
 

@@ -1,4 +1,3 @@
-import React from 'react';
 import { X, Flame, Clock, Dumbbell } from 'lucide-react';
 import { Progress, WorkoutHistory } from '../types';
 

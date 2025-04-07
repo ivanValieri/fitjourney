@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X, ArrowRight } from 'lucide-react';
 import { UserProfile, Goal } from '../types';
 import toast from 'react-hot-toast';
@@ -42,7 +42,7 @@ export default function EditProfileModal({ profile, onSave, onClose }: EditProfi
   ) => {
     const { name, value } = e.target;
     if (name === 'goal') {
-      setFormData({ ...formData, goal: { type: value as 'weight-loss' | 'maintain' } });
+      setFormData({ ...formData, goal: { type: value as 'weight-loss' | 'fitness-maintenance' } });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -147,7 +147,7 @@ export default function EditProfileModal({ profile, onSave, onClose }: EditProfi
                 required
               >
                 <option value="weight-loss">Perda de Peso</option>
-                <option value="maintain">Manter Forma</option>
+                <option value="fitness-maintenance">Manter Forma</option>
               </select>
             </div>
 

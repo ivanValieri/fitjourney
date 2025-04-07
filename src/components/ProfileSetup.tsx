@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { UserProfile, Goal, RecommendedPlan } from '../types';
 import { ChevronRight, User2, Target, Clock, Scale, Ruler } from 'lucide-react';
 
@@ -39,7 +39,7 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
   };
 
   const generateRecommendedPlan = (profile: Partial<UserProfile>) => {
-    if (!profile.weight || !profile.height || !profile.age || !profile.goal?.type) return null;
+    if (!profile.weight || !profile.height || !profile.age || !profile.goal?.type) return undefined;
 
     const imc = calculateIMC(profile.weight, profile.height);
     const dailyCalories = calculateDailyCalories(
@@ -336,7 +336,7 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
           </div>
         );
       default:
-        return null;
+        return undefined;
     }
   };
 

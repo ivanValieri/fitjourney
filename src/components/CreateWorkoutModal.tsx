@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Plus } from 'lucide-react';
 import { Exercise } from '../types';
 import toast from 'react-hot-toast';
@@ -51,37 +51,18 @@ const CreateWorkoutModal: React.FC<CreateWorkoutModalProps> = ({ onClose, onCrea
     }
 
     const newWorkout: Exercise = {
-      id: `custom-${Date.now()}`, // ID único para treinos personalizados
+      id: `custom-${Date.now()}`,
       name,
-      description: '', // Opcional, pode ser adicionado em uma versão futura do modal
-      duration,
-      difficulty: 'beginner', // Valor padrão, pode ser ajustado pelo usuário no futuro
-      muscleGroup: '', // Opcional
-      imageUrl: '', // Opcional
-      videoUrl: videoUrl || undefined,
-      calories,
-      equipment: [], // Opcional
-      steps: steps.filter(step => step.trim() !== ''),
-      illustrations: [], // Opcional
-      tips: [], // Opcional
-      commonMistakes: [], // Opcional
-      breathingPattern: undefined, // Opcional
-      targetMuscles: [], // Opcional
-      secondaryMuscles: [], // Opcional
+      description: '',
+      equipment: [],
+      tips: [],
+      commonMistakes: [],
+      targetMuscles: [],
+      secondaryMuscles: [],
       nutrition: {
-        preTreino: [], // Opcional
-        posTreino: [], // Opcional
-      },
-      suitableFor: {
-        imcRange: {}, // Opcional
-        ageRange: {}, // Opcional
-      },
-      modifications: {
-        easier: [], // Opcional
-        harder: [], // Opcional
-      },
-      precautions: [], // Opcional
-      custom: true, // Marca como treino personalizado
+        before: [],
+        after: []
+      }
     };
 
     onCreate(newWorkout);

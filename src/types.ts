@@ -1,6 +1,7 @@
 export interface Goal {
-  type: 'weight-loss' | 'maintain';
+  type: 'weight-loss' | 'fitness-maintenance';
   targetCalories?: number;
+  intensity?: string;
 }
 
 export interface Progress {

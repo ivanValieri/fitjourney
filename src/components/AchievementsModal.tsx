@@ -1,4 +1,3 @@
-import React from 'react';
 import { X, Trophy } from 'lucide-react';
 import { Achievement } from '../types';
 
