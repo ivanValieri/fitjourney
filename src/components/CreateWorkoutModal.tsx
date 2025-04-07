@@ -1,9 +1,10 @@
 // teste para git
+// santos the best
 
 
 import { useState } from 'react';
 import { X, Plus } from 'lucide-react';
-import { Exercise } from '../types';
+import type { Exercise } from '../types/index';
 import toast from 'react-hot-toast';
 
 interface CreateWorkoutModalProps {
@@ -17,9 +18,6 @@ const CreateWorkoutModal: React.FC<CreateWorkoutModalProps> = ({ onClose, onCrea
   const [calories, setCalories] = useState<number>(100);
   const [steps, setSteps] = useState<string[]>(['']);
   const [videoUrl, setVideoUrl] = useState<string>('');
-  const [exerciseName, setExerciseName] = useState('');
-  const [exerciseDescription, setExerciseDescription] = useState('');
-  const [exerciseEquipment, setExerciseEquipment] = useState<string[]>([]);
 
   const handleAddStep = () => {
     setSteps([...steps, '']);
@@ -36,37 +34,29 @@ const CreateWorkoutModal: React.FC<CreateWorkoutModalProps> = ({ onClose, onCrea
     setSteps(steps.filter((_, i) => i !== index));
   };
 
-  const handleAddExercise = () => {
-    const newExercise: Exercise = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: exerciseName,
-      description: exerciseDescription,
-      equipment: exerciseEquipment
-    };
-
-    // ... rest of the code ...
-  };
-
   const handleSubmit = () => {
     if (!name || !duration || !calories || steps.some(step => !step.trim())) {
       toast.error('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
-    const newWorkout: Exercise = {
+    const newWorkout = {
       id: `custom-${Date.now()}`,
       name,
-      description: '',
-      equipment: [],
-      tips: [],
-      commonMistakes: [],
-      targetMuscles: [],
-      secondaryMuscles: [],
+      description: steps.join('\n'),
+      equipment: [] as string[],
+      tips: [] as string[],
+      commonMistakes: [] as string[],
+      targetMuscles: [] as string[],
+      secondaryMuscles: [] as string[],
       nutrition: {
-        before: [],
-        after: []
-      }
-    };
+        preTreino: [] as string[],
+        posTreino: [] as string[]
+      },
+      duration,
+      calories,
+      steps
+    } satisfies Exercise;
 
     onCreate(newWorkout);
     toast.success('Treino criado com sucesso!');

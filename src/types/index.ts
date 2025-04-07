@@ -2,15 +2,18 @@ export type Exercise = {
   id: string;
   name: string;
   description: string;
-  equipment?: string;
+  equipment?: string[];
   tips?: string[];
   commonMistakes?: string[];
   targetMuscles?: string[];
   secondaryMuscles?: string[];
   nutrition?: {
-    before?: string[];
-    after?: string[];
+    preTreino?: string[];
+    posTreino?: string[];
   };
+  duration?: number;
+  calories?: number;
+  steps?: string[];
 };
 
 export type UserProfile = {
