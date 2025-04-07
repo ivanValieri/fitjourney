@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, ArrowRight } from 'lucide-react';
-import { UserProfile } from '../types';
+import { UserProfile, Goal } from '../types';
 import toast from 'react-hot-toast';
 
 interface EditProfileModalProps {
@@ -19,6 +19,7 @@ export default function EditProfileModal({ profile, onSave, onClose }: EditProfi
     fitnessLevel: profile.fitnessLevel || 'beginner',
     preferredDuration: profile.preferredDuration || 30,
     imc: profile.imc || 0,
+    favorites: profile.favorites || [],
   });
   const [loading, setLoading] = useState(false);
 
@@ -32,6 +33,7 @@ export default function EditProfileModal({ profile, onSave, onClose }: EditProfi
       fitnessLevel: profile.fitnessLevel || 'beginner',
       preferredDuration: profile.preferredDuration || 30,
       imc: profile.imc || 0,
+      favorites: profile.favorites || [],
     });
   }, [profile]);
 
@@ -56,13 +58,16 @@ export default function EditProfileModal({ profile, onSave, onClose }: EditProfi
     e.preventDefault();
     setLoading(true);
 
-    const updatedProfile = {
-      ...formData,
-      imc: parseFloat(calculateIMC(parseInt(formData.height as any), parseInt(formData.weight as any))),
-      age: parseInt(formData.age as any),
-      height: parseInt(formData.height as any),
-      weight: parseInt(formData.weight as any),
-      preferredDuration: parseInt(formData.preferredDuration as any),
+    const updatedProfile: UserProfile = {
+      name: formData.name,
+      age: Number(formData.age),
+      height: Number(formData.height),
+      weight: Number(formData.weight),
+      goal: formData.goal,
+      fitnessLevel: formData.fitnessLevel,
+      preferredDuration: Number(formData.preferredDuration),
+      imc: Number(formData.weight) / (Number(formData.height) * Number(formData.height)),
+      favorites: formData.favorites || [],
     };
 
     onSave(updatedProfile);

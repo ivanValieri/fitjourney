@@ -14,6 +14,9 @@ const CreateWorkoutModal: React.FC<CreateWorkoutModalProps> = ({ onClose, onCrea
   const [calories, setCalories] = useState<number>(100);
   const [steps, setSteps] = useState<string[]>(['']);
   const [videoUrl, setVideoUrl] = useState<string>('');
+  const [exerciseName, setExerciseName] = useState('');
+  const [exerciseDescription, setExerciseDescription] = useState('');
+  const [exerciseEquipment, setExerciseEquipment] = useState<string[]>([]);
 
   const handleAddStep = () => {
     setSteps([...steps, '']);
@@ -28,6 +31,17 @@ const CreateWorkoutModal: React.FC<CreateWorkoutModalProps> = ({ onClose, onCrea
   const handleRemoveStep = (index: number) => {
     if (steps.length === 1) return;
     setSteps(steps.filter((_, i) => i !== index));
+  };
+
+  const handleAddExercise = () => {
+    const newExercise: Exercise = {
+      id: Math.random().toString(36).substr(2, 9),
+      name: exerciseName,
+      description: exerciseDescription,
+      equipment: exerciseEquipment
+    };
+
+    // ... rest of the code ...
   };
 
   const handleSubmit = () => {

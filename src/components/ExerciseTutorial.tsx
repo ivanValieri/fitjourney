@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Play, Pause, RotateCcw, ChevronRight, ChevronLeft, AlertTriangle, CheckCircle2, Timer } from 'lucide-react';
+import { X, Play, Pause, RotateCcw, ChevronRight, ChevronLeft, AlertTriangle, CheckCircle2, Timer, Target, Dumbbell, Apple, Trophy } from 'lucide-react';
 import { Exercise } from '../types';
 
 interface ExerciseTutorialProps {
@@ -201,11 +201,8 @@ export default function ExerciseTutorial({ exercise, onClose }: ExerciseTutorial
                     <h4 className="font-semibold text-green-800">Dicas Importantes</h4>
                   </div>
                   <ul className="space-y-2">
-                    {exercise.tips.map((tip, index) => (
-                      <li key={index} className="text-green-700 flex items-start space-x-2">
-                        <span className="block w-1 h-1 mt-2 rounded-full bg-green-600" />
-                        <span>{tip}</span>
-                      </li>
+                    {exercise.tips?.map((tip, index) => (
+                      <li key={index} className="mb-2">{tip}</li>
                     ))}
                   </ul>
                 </div>
@@ -215,11 +212,8 @@ export default function ExerciseTutorial({ exercise, onClose }: ExerciseTutorial
                     <h4 className="font-semibold text-red-800">Erros Comuns</h4>
                   </div>
                   <ul className="space-y-2">
-                    {exercise.commonMistakes.map((mistake, index) => (
-                      <li key={index} className="text-red-700 flex items-start space-x-2">
-                        <span className="block w-1 h-1 mt-2 rounded-full bg-red-600" />
-                        <span>{mistake}</span>
-                      </li>
+                    {exercise.commonMistakes?.map((mistake, index) => (
+                      <li key={index} className="mb-2">{mistake}</li>
                     ))}
                   </ul>
                 </div>
@@ -232,16 +226,16 @@ export default function ExerciseTutorial({ exercise, onClose }: ExerciseTutorial
                   <div>
                     <p className="text-sm font-medium text-purple-700 mb-2">Principais:</p>
                     <ul className="space-y-1">
-                      {exercise.targetMuscles.map((muscle, index) => (
-                        <li key={index} className="text-purple-600">{muscle}</li>
+                      {exercise.targetMuscles?.map((muscle, index) => (
+                        <li key={index} className="mb-2">{muscle}</li>
                       ))}
                     </ul>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-purple-700 mb-2">Secundários:</p>
                     <ul className="space-y-1">
-                      {exercise.secondaryMuscles.map((muscle, index) => (
-                        <li key={index} className="text-purple-600">{muscle}</li>
+                      {exercise.secondaryMuscles?.map((muscle, index) => (
+                        <li key={index} className="mb-2">{muscle}</li>
                       ))}
                     </ul>
                   </div>
@@ -255,16 +249,16 @@ export default function ExerciseTutorial({ exercise, onClose }: ExerciseTutorial
             <div className="bg-green-50 p-4 rounded-xl">
               <h4 className="font-semibold text-green-800 mb-2">Nutrição Pré-treino</h4>
               <ul className="list-disc pl-4 space-y-1">
-                {exercise.nutrition.preTreino.map((item, index) => (
-                  <li key={index} className="text-green-700">{item}</li>
+                {exercise.nutrition?.before?.map((item, index) => (
+                  <li key={index} className="mb-2">{item}</li>
                 ))}
               </ul>
             </div>
             <div className="bg-purple-50 p-4 rounded-xl">
               <h4 className="font-semibold text-purple-800 mb-2">Nutrição Pós-treino</h4>
               <ul className="list-disc pl-4 space-y-1">
-                {exercise.nutrition.posTreino.map((item, index) => (
-                  <li key={index} className="text-purple-700">{item}</li>
+                {exercise.nutrition?.after?.map((item, index) => (
+                  <li key={index} className="mb-2">{item}</li>
                 ))}
               </ul>
             </div>

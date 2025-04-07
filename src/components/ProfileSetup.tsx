@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserProfile } from '../types';
+import { UserProfile, Goal, RecommendedPlan } from '../types';
 import { ChevronRight, User2, Target, Clock, Scale, Ruler } from 'lucide-react';
 
 interface ProfileSetupProps {
@@ -9,6 +9,11 @@ interface ProfileSetupProps {
 export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
   const [step, setStep] = useState(1);
   const [profile, setProfile] = useState<Partial<UserProfile>>({});
+  const [goal, setGoal] = useState<Goal>({
+    type: "weight-loss",
+    intensity: "moderate"
+  });
+  const [recommendedPlan, setRecommendedPlan] = useState<RecommendedPlan | undefined>(undefined);
 
   const calculateIMC = (weight: number, height: number): number => {
     const heightInMeters = height / 100;
@@ -151,6 +156,10 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
     setStep(step + 1);
   };
 
+  const handleGoalChange = (newGoal: "weight-loss" | "fitness-maintenance") => {
+    setGoal({ ...goal, type: newGoal });
+  };
+
   const renderStep = () => {
     switch (step) {
       case 1:
@@ -251,14 +260,11 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
             <div className="grid grid-cols-1 gap-4">
               <button
                 onClick={() => {
-                  setProfile({ 
-                    ...profile, 
-                    goal: { type: 'weight-loss', intensity: 'medium' }
-                  });
+                  handleGoalChange('weight-loss');
                   nextStep();
                 }}
                 className={`p-6 rounded-xl border-2 ${
-                  profile.goal?.type === 'weight-loss'
+                  goal.type === 'weight-loss'
                     ? 'border-purple-500 bg-purple-50'
                     : 'border-gray-200 hover:border-purple-200 hover:bg-purple-50'
                 } transition-all duration-200`}
@@ -268,14 +274,11 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
               </button>
               <button
                 onClick={() => {
-                  setProfile({ 
-                    ...profile, 
-                    goal: { type: 'fitness-maintenance', intensity: 'medium' }
-                  });
+                  handleGoalChange('fitness-maintenance');
                   nextStep();
                 }}
                 className={`p-6 rounded-xl border-2 ${
-                  profile.goal?.type === 'fitness-maintenance'
+                  goal.type === 'fitness-maintenance'
                     ? 'border-purple-500 bg-purple-50'
                     : 'border-gray-200 hover:border-purple-200 hover:bg-purple-50'
                 } transition-all duration-200`}
