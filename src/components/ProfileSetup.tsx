@@ -40,7 +40,6 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
   const generateRecommendedPlan = (profile: Partial<UserProfile>) => {
     if (!profile.weight || !profile.height || !profile.age || !profile.goal?.type) return undefined;
 
-    const imc = calculateIMC(profile.weight, profile.height);
     const dailyCalories = calculateDailyCalories(
       profile.weight,
       profile.height,
