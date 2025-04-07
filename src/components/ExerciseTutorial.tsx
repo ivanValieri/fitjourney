@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Play, Pause, RotateCcw, ChevronRight, ChevronLeft, AlertTriangle, CheckCircle2, Timer, Target, Dumbbell, Apple, Trophy } from 'lucide-react';
+import { X, Play, Pause, RotateCcw, ChevronRight, ChevronLeft, AlertTriangle, CheckCircle2, Timer, Apple } from 'lucide-react';
 import { Exercise } from '../types';
 
 interface ExerciseTutorialProps {

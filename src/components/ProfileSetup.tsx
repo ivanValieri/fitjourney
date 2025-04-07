@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { UserProfile, Goal, RecommendedPlan } from '../types';
+import { UserProfile, Goal } from '../types';
 import { ChevronRight, User2, Scale, Ruler } from 'lucide-react';
 
 interface ProfileSetupProps {
@@ -126,12 +126,11 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isProfileComplete()) {
-      const imc = calculateIMC(profile.weight!, profile.height!);
       const plan = generateRecommendedPlan(profile);
       
       const finalProfile: UserProfile = {
         ...profile as UserProfile,
-        imc,
+        imc: calculateIMC(profile.weight!, profile.height!),
         recommendedPlan: plan,
       };
       

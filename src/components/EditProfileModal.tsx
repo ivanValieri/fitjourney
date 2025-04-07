@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, ArrowRight } from 'lucide-react';
-import { UserProfile, Goal } from '../types';
-import toast from 'react-hot-toast';
+import { UserProfile } from '../types';
 
 interface EditProfileModalProps {
   profile: UserProfile;
@@ -46,12 +45,6 @@ export default function EditProfileModal({ profile, onSave, onClose }: EditProfi
     } else {
       setFormData({ ...formData, [name]: value });
     }
-  };
-
-  const calculateIMC = (height: number, weight: number) => {
-    if (!height || !weight) return 0;
-    const heightInMeters = height / 100;
-    return (weight / (heightInMeters * heightInMeters)).toFixed(1);
   };
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -78,6 +78,39 @@ export type RecommendedPlan = {
   };
 };
 
+export type Progress = {
+  totalCaloriesBurned: number;
+  workoutsCompleted: number;
+};
+
+export type WorkoutHistory = {
+  date: string;
+  exerciseName: string;
+  caloriesBurned: number;
+};
+
+export type Achievement = {
+  id: string;
+  title: string;
+  description: string;
+  completed: boolean;
+  icon?: string;
+};
+
+export type ThemePreferences = {
+  darkMode: boolean;
+  primaryColor: string;
+  secondaryColor: string;
+};
+
+export type ChatHistory = {
+  messages: {
+    role: 'user' | 'assistant';
+    content: string;
+    timestamp: string;
+  }[];
+};
+
 // Função de validação para garantir que um objeto é um UserProfile válido
 export function isValidUserProfile(profile: any): profile is UserProfile {
   return (

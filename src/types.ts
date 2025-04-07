@@ -1,3 +1,5 @@
+//agora vai
+
 export interface Goal {
   type: 'weight-loss' | 'fitness-maintenance';
   targetCalories?: number;
