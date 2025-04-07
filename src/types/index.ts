@@ -34,6 +34,8 @@ export type Exercise = {
 };
 
 export type UserProfile = {
+  user_id?: string;
+  created_at?: string;
   name: string;
   age: number;
   height: number;
@@ -42,7 +44,13 @@ export type UserProfile = {
   fitnessLevel: "beginner" | "intermediate" | "advanced";
   preferredDuration: number;
   imc: number;
-  favorites?: string[];
+  progress?: Progress;
+  workoutHistory?: WorkoutHistory[];
+  achievements?: Achievement[];
+  customWorkouts?: Exercise[];
+  favorites: string[];
+  themePreferences?: ThemePreferences;
+  chatHistory?: ChatHistory;
 };
 
 export type Goal = {
@@ -68,4 +76,21 @@ export type RecommendedPlan = {
     sessionsPerDay: number;
     recommendedExercises: string[];
   };
-}; 
+};
+
+// Função de validação para garantir que um objeto é um UserProfile válido
+export function isValidUserProfile(profile: any): profile is UserProfile {
+  return (
+    typeof profile === 'object' &&
+    typeof profile.name === 'string' &&
+    typeof profile.age === 'number' &&
+    typeof profile.height === 'number' &&
+    typeof profile.weight === 'number' &&
+    typeof profile.goal === 'object' &&
+    typeof profile.fitnessLevel === 'string' &&
+    ['beginner', 'intermediate', 'advanced'].includes(profile.fitnessLevel) &&
+    typeof profile.preferredDuration === 'number' &&
+    typeof profile.imc === 'number' &&
+    Array.isArray(profile.favorites)
+  );
+} 

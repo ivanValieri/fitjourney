@@ -1,4 +1,5 @@
 import Chatbot from './components/Chatbot';
+import { Exercise, UserProfile } from './types';
 import { useState, useMemo, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import Header from './components/Header';
@@ -10,14 +11,13 @@ import AchievementsModal from './components/AchievementsModal';
 import AuthModal from './components/AuthModal';
 import EditProfileModal from './components/EditProfileModal';
 import CreateWorkoutModal from './components/CreateWorkoutModal';
-import { Exercise, UserProfile } from './types';
 import { Activity, Target, Flame, Clock, Dumbbell, Trophy, Scale, Pencil } from 'lucide-react';
 import { BASE_EXERCISES } from './data/exercises';
 import { ACHIEVEMENTS } from './data/achievements';
 import { supabase } from './lib/supabase';
 import toast from 'react-hot-toast';
 import { useTheme } from './context/ThemeContext';
-import { askMistral } from './api/mistral'; // Adicionei esta linha
+import { askMistral } from './api/mistral';
 
 // Adicione ESTE console.log logo após os imports:
 console.log("DEBUG: mistral.ts carregado?", typeof askMistral !== 'undefined');
@@ -139,6 +139,14 @@ function App() {
       return;
     }
 
+    // Validar campos obrigatórios
+    if (!updatedProfile.name || !updatedProfile.age || !updatedProfile.height || 
+        !updatedProfile.weight || !updatedProfile.goal || !updatedProfile.fitnessLevel || 
+        !updatedProfile.preferredDuration || !updatedProfile.imc) {
+      toast.error('Todos os campos obrigatórios devem ser preenchidos.');
+      return;
+    }
+
     console.log('Atualizando perfil:', updatedProfile);
     const { error } = await supabase
       .from('profiles')
@@ -151,7 +159,28 @@ function App() {
       return;
     }
 
-    setUserProfile({ ...userProfile, ...updatedProfile });
+    // Atualizar o estado com o perfil validado
+    setUserProfile(prev => {
+      if (!prev) return updatedProfile;
+      return {
+        ...prev,
+        name: updatedProfile.name,
+        age: updatedProfile.age,
+        height: updatedProfile.height,
+        weight: updatedProfile.weight,
+        goal: updatedProfile.goal,
+        fitnessLevel: updatedProfile.fitnessLevel,
+        preferredDuration: updatedProfile.preferredDuration,
+        imc: updatedProfile.imc,
+        favorites: updatedProfile.favorites || [],
+        progress: prev.progress || { totalCaloriesBurned: 0, workoutsCompleted: 0 },
+        workoutHistory: prev.workoutHistory || [],
+        achievements: prev.achievements || [],
+        customWorkouts: prev.customWorkouts || [],
+        themePreferences: prev.themePreferences,
+        chatHistory: prev.chatHistory
+      } as UserProfile;
+    });
     setShowEditProfile(false);
     toast.success('Perfil atualizado com sucesso!');
   };
@@ -267,8 +296,12 @@ function App() {
 
   const handleCreateWorkout = (workout: Exercise) => {
     try {
-      // Lógica síncrona aqui
-      setUserProfile(prev => ({ ...prev, customWorkouts: [...(prev?.customWorkouts || []), workout] }));
+      if (!userProfile) return;
+      const updatedProfile: UserProfile = {
+        ...userProfile,
+        customWorkouts: [...(userProfile.customWorkouts || []), workout]
+      };
+      setUserProfile(updatedProfile);
       toast.success('Treino criado com sucesso!');
     } catch (error) {
       console.error('Erro ao criar treino:', error);
@@ -299,10 +332,11 @@ function App() {
         return;
       }
 
-      setUserProfile(prev => {
-        if (!prev) return undefined;
-        return { ...prev, favorites: newFavorites };
-      });
+      const updatedProfile: UserProfile = {
+        ...userProfile,
+        favorites: newFavorites
+      };
+      setUserProfile(updatedProfile);
       
       toast.success(isCurrentlyFavorite ? 'Removido dos favoritos!' : 'Adicionado aos favoritos!');
     } catch (err) {
