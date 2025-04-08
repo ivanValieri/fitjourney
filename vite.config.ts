@@ -17,12 +17,21 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       host: true
     },
+    css: {
+      postcss: {
+        plugins: [
+          require('tailwindcss'),
+          require('autoprefixer'),
+        ],
+      },
+    },
     build: {
       rollupOptions: {
         output: {
           manualChunks: undefined
         }
-      }
+      },
+      sourcemap: true,
     },
     define: {
       'process.env': {
