@@ -4,8 +4,6 @@ import path from 'path';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const isProd = mode === 'production';
-
   return {
     plugins: [react()],
     resolve: {
@@ -13,32 +11,11 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, './src'),
       },
     },
-    server: {
-      port: 3000,
-      host: true
-    },
-    css: {
-      postcss: {
-        plugins: [
-          require('tailwindcss'),
-          require('autoprefixer'),
-        ],
-      },
-    },
     build: {
       rollupOptions: {
         output: {
           manualChunks: undefined
         }
-      },
-      sourcemap: true,
-    },
-    define: {
-      'process.env': {
-        ...env,
-        VITE_MISTRAL_API_KEY: JSON.stringify(env.VITE_MISTRAL_API_KEY),
-        VITE_MISTRAL_API_URL: JSON.stringify(env.VITE_MISTRAL_API_URL),
-        VITE_MISTRAL_MODEL: JSON.stringify(env.VITE_MISTRAL_MODEL)
       }
     }
   };
