@@ -3,7 +3,15 @@
   publish = "dist"
   node_version = "16.14.0"  # Substitua pela versão desejada
 
+[build.environment]
+  NPM_FLAGS = "--legacy-peer-deps"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
