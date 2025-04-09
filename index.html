@@ -5,10 +5,53 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FitJourney</title>
-    <!-- Garantir que o CSS seja carregado corretamente -->
-    <link rel="stylesheet" href="/src/index.css" />
-    <!-- Fallback para Tailwind CDN (caso o build do CSS falhe) -->
+    
+    <!-- Tailwind CSS via CDN - Solução temporária -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {},
+        }
+      }
+    </script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        /* Adicione estilos customizados aqui */
+        html {
+          transition: background 0.3s ease, color 0.3s ease;
+        }
+        .dark {
+          color: #F3F4F6; /* text-gray-100 */
+        }
+        .dark .bg-white {
+          background-color: #374151; /* bg-gray-700 */
+        }
+        .dark .text-gray-900 {
+          color: #F3F4F6; /* text-gray-100 */
+        }
+        .dark .text-gray-600 {
+          color: #9CA3AF; /* text-gray-400 */
+        }
+        .dark .text-gray-700 {
+          color: #D1D5DB; /* text-gray-300 */
+        }
+        .dark .bg-gray-50 {
+          background-color: #4B5563; /* bg-gray-600 */
+        }
+        .dark .hover\:bg-gray-50:hover {
+          background-color: #6B7280; /* bg-gray-500 */
+        }
+        ::-webkit-scrollbar {
+          width: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #9CA3AF;
+          border-radius: 3px;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
