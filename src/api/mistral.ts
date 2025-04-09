@@ -3,8 +3,8 @@
 // TEST WEBHOOK DEPLOYMENT - VERCEL AUTO DEPLOY
 // TESTE DE MODIFICAÇÃO 123
 // COMENTÁRIO ADICIONAL PARA TESTE DE VISIBILIDADE NO GITHUB
-const MISTRAL_API_URL = "https://api.mistral.ai/v1/chat/completions";
-const MISTRAL_MODEL = import.meta.env.VITE_MISTRAL_MODEL || "mistral-tiny";
+const MISTRAL_API_URL = import.meta.env.VITE_MISTRAL_API_URL || "https://api.openrouter.ai/api/v1/chat/completions";
+const MISTRAL_MODEL = import.meta.env.VITE_MISTRAL_MODEL || "mistralai/mistral-7b-instruct:free";
 
 export const askMistral = async (prompt: string): Promise<string> => {
   console.log("=== INICIANDO NOVA REQUISIÇÃO MISTRAL - V2 ===");
@@ -39,11 +39,13 @@ export const askMistral = async (prompt: string): Promise<string> => {
       stream: false
     };
     
+    // Headers para o OpenRouter
     const headers = {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey}`,
       "Accept": "application/json",
-      "Origin": window.location.origin
+      "HTTP-Referer": window.location.origin,
+      "X-Title": "FitJourney"
     };
 
     console.log("Enviando requisição para:", MISTRAL_API_URL);
