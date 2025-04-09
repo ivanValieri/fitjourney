@@ -12,9 +12,16 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
+      cssCodeSplit: false,
       rollupOptions: {
         output: {
-          manualChunks: undefined
+          manualChunks: undefined,
+          assetFileNames: (assetInfo) => {
+            if (assetInfo.name.endsWith('.css')) {
+              return 'assets/styles.[hash].css';
+            }
+            return 'assets/[name].[hash].[ext]';
+          }
         }
       }
     }

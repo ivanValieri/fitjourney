@@ -1,3 +1,4 @@
+// open
 // src/api/mistral.ts
 // TEST WEBHOOK DEPLOYMENT - VERCEL AUTO DEPLOY
 const MISTRAL_API_URL = "https://api.mistral.ai/v1/chat/completions";
