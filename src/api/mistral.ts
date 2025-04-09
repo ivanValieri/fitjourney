@@ -2,6 +2,7 @@
 // src/api/mistral.ts
 // TEST WEBHOOK DEPLOYMENT - VERCEL AUTO DEPLOY
 // TESTE DE MODIFICAÇÃO 123
+// COMENTÁRIO ADICIONAL PARA TESTE DE VISIBILIDADE NO GITHUB
 const MISTRAL_API_URL = "https://api.mistral.ai/v1/chat/completions";
 const MISTRAL_MODEL = import.meta.env.VITE_MISTRAL_MODEL || "mistral-tiny";
 
