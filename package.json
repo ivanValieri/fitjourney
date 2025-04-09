@@ -9,7 +9,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "vercel-build": "vite build",
-    "clean": "rm -rf dist .vercel",
+    "clean": "rimraf dist .vercel",
     "tailwind:watch": "tailwindcss -i ./src/index.css -o ./src/output.css --watch"
   },
   "dependencies": {
@@ -37,6 +37,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "postcss": "8.5.3",
+    "rimraf": "6.0.1",
     "tailwindcss": "4.1.3",
     "typescript": "^5.2.2",
     "vite": "^5.1.4"
