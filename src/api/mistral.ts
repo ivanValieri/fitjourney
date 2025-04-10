@@ -3,7 +3,7 @@
 // TEST WEBHOOK DEPLOYMENT - VERCEL AUTO DEPLOY
 // TESTE DE MODIFICAÇÃO 123
 // COMENTÁRIO ADICIONAL PARA TESTE DE VISIBILIDADE NO GITHUB
-const MISTRAL_API_URL = import.meta.env.VITE_MISTRAL_API_URL || "https://api.openrouter.ai/api/v1/chat/completions";
+const MISTRAL_API_URL = import.meta.env.VITE_MISTRAL_API_URL || "https://openrouter.ai/api/v1/chat/completions";
 const MISTRAL_MODEL = import.meta.env.VITE_MISTRAL_MODEL || "mistralai/mistral-7b-instruct:free";
 
 export const askMistral = async (prompt: string): Promise<string> => {
@@ -14,6 +14,7 @@ export const askMistral = async (prompt: string): Promise<string> => {
   console.log("Modelo:", MISTRAL_MODEL);
   
   const apiKey = import.meta.env.VITE_MISTRAL_API_KEY;
+  console.log("API Key (início):", apiKey?.slice(0, 5));
   if (!apiKey) {
     console.error("API Key não encontrada no ambiente:", import.meta.env);
     throw new Error("API Key não encontrada");
