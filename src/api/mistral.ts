@@ -44,9 +44,9 @@ export const askMistral = async (prompt: string): Promise<string> => {
     const headers = {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey}`,
-      "Accept": "application/json",
-      "HTTP-Referer": window.location.origin,
-      "X-Title": "FitJourney"
+      "HTTP-Referer": window.location.origin, // obrigatório
+      "X-Title": "FitJourney",                 // obrigatório
+      "OpenRouter-User-ID": "anonymous"       // novo e importante
     };
 
     console.log("Enviando requisição para:", MISTRAL_API_URL);
