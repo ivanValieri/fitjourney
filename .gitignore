@@ -30,7 +30,7 @@ dist-ssr
 .env.development.local
 .env.test.local
 # Do not ignore production env file
-#.env.production
+.env.production
 
 # Build
 build/
