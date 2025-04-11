@@ -1,0 +1,14 @@
+Checklist padrão pra subir pro GitHub
+Ver se há mudanças:
+
+
+git status
+
+
+git add .
+
+
+git commit -m "descrição da alteração"
+
+
+git push
