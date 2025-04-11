@@ -18,9 +18,9 @@ export default function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingText, setStreamingText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Carrega o histórico quando o chat é aberto
   useEffect(() => {
     if (isOpen && user?.id) {
       loadChatHistory();
@@ -29,14 +29,13 @@ export default function Chatbot() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, streamingText]);
 
   const loadChatHistory = async () => {
     if (!user?.id) return;
 
     const history = await ChatService.loadChatHistory(user.id);
     if (history && history.conversations.length > 0) {
-      // Pega a conversa mais recente
       const latestConversation = history.conversations[0];
       const formattedMessages: Message[] = latestConversation.messages.map(msg => ({
         text: msg.content,
@@ -51,50 +50,49 @@ export default function Chatbot() {
     if (!inputText.trim() || isLoading || !user?.id) return;
 
     const timestamp = new Date().toISOString();
-    const userMessage: Message = { 
-      text: inputText, 
-      isUser: true,
-      timestamp 
-    };
+    const userMessage: Message = { text: inputText, isUser: true, timestamp };
     setMessages(prev => [...prev, userMessage]);
     setInputText('');
     setIsLoading(true);
+    setStreamingText('');
 
     try {
-      const response = await askMistral(inputText);
-      if (response) {
-        const assistantMessage: Message = { 
-          text: response, 
-          isUser: false,
-          timestamp: new Date().toISOString()
-        };
-        setMessages(prev => [...prev, assistantMessage]);
+      const fullResponse = await askMistral(inputText, (chunk) => {
+        setStreamingText(prev => prev + chunk);
+      });
 
-        // Salva a conversa no histórico
-        const chatMessages: ChatMessage[] = [
-          {
-            role: 'user',
-            content: userMessage.text,
-            timestamp: userMessage.timestamp!
-          },
-          {
-            role: 'assistant',
-            content: assistantMessage.text,
-            timestamp: assistantMessage.timestamp!
-          }
-        ];
-        await ChatService.saveConversation(user.id, chatMessages);
-      } else {
-        throw new Error('Resposta vazia do serviço');
-      }
-    } catch (error: any) {
+      const assistantMessage: Message = {
+        text: fullResponse,
+        isUser: false,
+        timestamp: new Date().toISOString()
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+      setStreamingText('');
+
+      const chatMessages: ChatMessage[] = [
+        {
+          role: 'user',
+          content: userMessage.text,
+          timestamp: userMessage.timestamp!
+        },
+        {
+          role: 'assistant',
+          content: assistantMessage.text,
+          timestamp: assistantMessage.timestamp!
+        }
+      ];
+      await ChatService.saveConversation(user.id, chatMessages);
+
+    } catch (error) {
       console.error('Erro ao enviar mensagem:', error);
       toast.error('Erro ao processar sua mensagem. Tente novamente.');
-      setMessages(prev => [...prev, { 
-        text: 'Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente.',
+      setMessages(prev => [...prev, {
+        text: 'Desculpe, ocorreu um erro ao processar sua mensagem.',
         isUser: false,
         timestamp: new Date().toISOString()
       }]);
+      setStreamingText('');
     } finally {
       setIsLoading(false);
     }
@@ -149,13 +147,11 @@ export default function Chatbot() {
                 </ul>
               </div>
             )}
-            
+
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`mb-4 ${
-                  msg.isUser ? 'flex justify-end' : 'flex justify-start'
-                }`}
+                className={`mb-4 ${msg.isUser ? 'flex justify-end' : 'flex justify-start'}`}
               >
                 <div
                   className={`max-w-[80%] p-3 rounded-lg ${
@@ -175,14 +171,15 @@ export default function Chatbot() {
                 </div>
               </div>
             ))}
-            
-            {isLoading && (
-              <div className="flex items-center space-x-2 p-3">
-                <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" />
-                <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
+
+            {streamingText && (
+              <div className="mb-4 flex justify-start">
+                <div className="max-w-[80%] p-3 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
+                  <p className="whitespace-pre-wrap">{streamingText}</p>
+                </div>
               </div>
             )}
+
             <div ref={messagesEndRef} />
           </div>
 
@@ -206,7 +203,7 @@ export default function Chatbot() {
               </button>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
-              {user ? 
+              {user ?
                 'Pressione Enter para enviar, Shift + Enter para nova linha' :
                 'Faça login para usar o chat'
               }
