@@ -4,11 +4,7 @@ export const askMistral = async (
   prompt: string,
   onStream?: (chunk: string) => void
 ): Promise<string> => {
-  const MISTRAL_API_URL = import.meta.env.VITE_MISTRAL_API_URL || "https://openrouter.ai/api/v1/chat/completions";
   const MISTRAL_MODEL = import.meta.env.VITE_MISTRAL_MODEL || "mistralai/mistral-7b-instruct:free";
-  const apiKey = import.meta.env.VITE_MISTRAL_API_KEY;
-
-  if (!apiKey) throw new Error("API Key não encontrada");
 
   const requestBody = {
     model: MISTRAL_MODEL,
@@ -22,13 +18,10 @@ export const askMistral = async (
     stream: true
   };
 
-  const response = await fetch(MISTRAL_API_URL, {
+  const response = await fetch("/.netlify/functions/mistral", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-      "HTTP-Referer": window.location.origin,
-      "X-Title": "FitJourney"
+      "Content-Type": "application/json"
     },
     body: JSON.stringify(requestBody)
   });
