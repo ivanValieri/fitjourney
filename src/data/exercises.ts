@@ -1,6 +1,15 @@
 import { Exercise } from '../types';
 
-export const BASE_EXERCISES: Exercise[] = [
+// Adicionando a propriedade caloriesBurned a todos os exercícios
+const mapExercises = (exercises: any[]): Exercise[] => {
+  return exercises.map(exercise => ({
+    ...exercise,
+    caloriesBurned: exercise.calories // Usando o valor da propriedade 'calories' existente
+  }));
+};
+
+// Lista de exercícios base sem a tipagem Exercise
+const BASE_EXERCISES_DATA = [
   // Exercícios para IMC Normal (18.5-24.9)
   {
     id: '1',
@@ -920,3 +929,6 @@ export const BASE_EXERCISES: Exercise[] = [
     ]
   }
 ];
+
+// Exportando os exercícios com a propriedade caloriesBurned adicionada
+export const BASE_EXERCISES: Exercise[] = mapExercises(BASE_EXERCISES_DATA);

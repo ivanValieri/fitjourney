@@ -152,27 +152,6 @@ export interface UserProfile {
   chatHistory?: ChatHistory;
 }
 
-export interface ProfileSetupProps {
-  onComplete: (profile: UserProfile) => Promise<void>;
-  onClose: () => void;
-}
-
-export interface EditProfileModalProps {
-  profile: UserProfile;
-  onUpdate: (updatedProfile: UserProfile) => Promise<void>;
-  onClose: () => void;
-}
-
-export interface CreateWorkoutModalProps {
-  onSave: (workout: Exercise) => void;
-  onClose: () => void;
-}
-
-export interface ProgressModalProps {
-  profile: UserProfile;
-  onClose: () => void;
-}
-
 export interface Workout {
   id: string;
   name: string;
@@ -180,11 +159,4 @@ export interface Workout {
   duration: number;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   exercises: Exercise[];
-}
-
-export interface WorkoutHistory {
-  date: string;
-  exerciseName: string;
-  caloriesBurned: number;
-  exercise?: Exercise;
 }

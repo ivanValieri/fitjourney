@@ -1,4 +1,4 @@
-import { UserProfile, Exercise, WorkoutHistory } from '../types';
+import { UserProfile, Exercise, WorkoutHistory, Progress } from '../types';
 
 export interface ProfileSetupProps {
   onComplete: (profile: UserProfile) => Promise<void>;
@@ -16,10 +16,7 @@ export interface CreateWorkoutModalProps {
 }
 
 export interface ProgressModalProps {
-  progress: {
-    totalCaloriesBurned: number;
-    workoutsCompleted: number;
-  };
+  progress: Progress;
   workoutHistory: WorkoutHistory[];
   onClose: () => void;
 }
