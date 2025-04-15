@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Workouts from './pages/Workouts';
 import Progress from './pages/Progress';
 import Profile from './pages/Profile';
+import DashboardPage from './pages/DashboardPage';
 
 // Usando HashRouter em vez de BrowserRouter para melhor compatibilidade com hospedagem estática
 export const router = createHashRouter([
@@ -27,6 +28,10 @@ export const router = createHashRouter([
       {
         path: '/profile',
         element: <Profile />
+      },
+      {
+        path: '/dashboard',
+        element: <DashboardPage />
       }
     ]
   },

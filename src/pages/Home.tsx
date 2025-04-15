@@ -63,6 +63,12 @@ const Home: React.FC = () => {
             >
               Ver Progresso
             </button>
+            <button 
+              onClick={() => navigate('/dashboard')}
+              className="px-6 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+            >
+              Acessar Dashboard
+            </button>
           </div>
         </div>
 

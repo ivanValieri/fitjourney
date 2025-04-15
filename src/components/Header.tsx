@@ -1,7 +1,8 @@
-import { Dumbbell, User, Bell, LogOut } from 'lucide-react';
+import { Dumbbell, User, Bell, LogOut, Home, LayoutDashboard } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import ThemeToggle from './ThemeToggle';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   onAuthClick: () => void;
@@ -9,6 +10,8 @@ interface HeaderProps {
 }
 
 export default function Header({ onAuthClick, isAuthenticated }: HeaderProps) {
+  const navigate = useNavigate();
+  
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -26,6 +29,35 @@ export default function Header({ onAuthClick, isAuthenticated }: HeaderProps) {
           <Dumbbell className="h-8 w-8" />
           <h1 className="text-2xl font-bold">FitJourney Pro</h1>
         </div>
+        
+        <nav className="hidden md:flex items-center space-x-6">
+          <button 
+            onClick={() => navigate('/')} 
+            className="flex items-center space-x-1 hover:bg-white/10 px-3 py-2 rounded-lg transition-colors"
+          >
+            <Home className="h-5 w-5" />
+            <span>Home</span>
+          </button>
+          
+          {isAuthenticated && (
+            <button 
+              onClick={() => navigate('/dashboard')} 
+              className="flex items-center space-x-1 hover:bg-white/10 px-3 py-2 rounded-lg transition-colors"
+            >
+              <LayoutDashboard className="h-5 w-5" />
+              <span>Dashboard</span>
+            </button>
+          )}
+          
+          <button 
+            onClick={() => navigate('/workouts')} 
+            className="flex items-center space-x-1 hover:bg-white/10 px-3 py-2 rounded-lg transition-colors"
+          >
+            <Dumbbell className="h-5 w-5" />
+            <span>Treinos</span>
+          </button>
+        </nav>
+        
         <div className="flex items-center space-x-4">
           <ThemeToggle />
           {isAuthenticated ? (
@@ -33,7 +65,10 @@ export default function Header({ onAuthClick, isAuthenticated }: HeaderProps) {
               <button className="p-2 hover:bg-white/10 rounded-full">
                 <Bell className="h-6 w-6" />
               </button>
-              <button className="p-2 hover:bg-white/10 rounded-full">
+              <button 
+                onClick={() => navigate('/profile')}
+                className="p-2 hover:bg-white/10 rounded-full"
+              >
                 <User className="h-6 w-6" />
               </button>
               <button
