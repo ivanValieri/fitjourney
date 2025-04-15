@@ -1,11 +1,15 @@
 import React from 'react';
 import { useState } from 'react';
 import { X, BarChart, Calendar, ArrowUpCircle } from 'lucide-react';
-import { WorkoutHistory } from '../types';
+import { WorkoutHistory, Progress } from '../types';
 import { ProgressModalProps } from './types';
 
-const ProgressModal: React.FC<ProgressModalProps> = ({ progress, workoutHistory, onClose }) => {
+const ProgressModal: React.FC<ProgressModalProps> = ({ profile, onClose }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'history'>('overview');
+  
+  // Extraindo progress e workoutHistory do profile
+  const progress = profile.progress || { totalCaloriesBurned: 0, workoutsCompleted: 0 };
+  const workoutHistory = profile.workoutHistory || [];
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -73,7 +77,7 @@ const ProgressModal: React.FC<ProgressModalProps> = ({ progress, workoutHistory,
           ) : (
             <div className="space-y-4">
               {workoutHistory.length > 0 ? (
-                workoutHistory.map((workout, index) => (
+                workoutHistory.map((workout: WorkoutHistory, index: number) => (
                   <div key={index} className="bg-gray-50 p-4 rounded-xl">
                     <div className="flex justify-between items-center mb-2">
                       <h3 className="font-semibold text-lg">{workout.exerciseName}</h3>

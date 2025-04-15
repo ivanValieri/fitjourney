@@ -11,7 +11,7 @@ import type { Exercise } from '../types';
 import toast from 'react-hot-toast';
 import { CreateWorkoutModalProps } from './types';
 
-const CreateWorkoutModal: React.FC<CreateWorkoutModalProps> = ({ onClose, onCreate }) => {
+const CreateWorkoutModal: React.FC<CreateWorkoutModalProps> = ({ onClose, onSave }) => {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState<number>(10);
   const [calories, setCalories] = useState<number>(100);
@@ -73,7 +73,7 @@ const CreateWorkoutModal: React.FC<CreateWorkoutModalProps> = ({ onClose, onCrea
       }
     };
     
-    onCreate(newWorkout);
+    onSave(newWorkout);
     onClose();
     toast.success('Treino personalizado criado com sucesso!');
   };

@@ -4,7 +4,7 @@ import { X, ArrowRight } from 'lucide-react';
 import { UserProfile } from '../types';
 import { EditProfileModalProps } from './types';
 
-const EditProfileModal: React.FC<EditProfileModalProps> = ({ profile, onUpdate, onClose }) => {
+const EditProfileModal: React.FC<EditProfileModalProps> = ({ profile, onSave, onClose }) => {
   const [formData, setFormData] = useState<UserProfile>({
     name: profile.name || '',
     age: profile.age || 0,
@@ -59,7 +59,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ profile, onUpdate, 
       favorites: formData.favorites || [],
     };
 
-    onUpdate(updatedProfile);
+    onSave(updatedProfile);
     setLoading(false);
   };
 
