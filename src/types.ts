@@ -15,6 +15,7 @@ export interface WorkoutHistory {
   date: string;
   exerciseName: string;
   caloriesBurned: number;
+  exercise?: Exercise;
 }
 
 export interface Achievement {
@@ -22,6 +23,11 @@ export interface Achievement {
   name: string;
   description: string;
   completed: boolean;
+  requirements: Array<{
+    type: 'calories' | 'workouts';
+    target: number;
+  }>;
+  title: string;
 }
 
 export interface SuitableFor {
@@ -47,6 +53,7 @@ export interface Exercise {
   imageUrl: string;
   duration: number;
   calories: number;
+  caloriesBurned: number;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   muscleGroup: string;
   steps: string[];
@@ -143,4 +150,41 @@ export interface UserProfile {
   favorites: string[];
   themePreferences?: ThemePreferences;
   chatHistory?: ChatHistory;
+}
+
+export interface ProfileSetupProps {
+  onComplete: (profile: UserProfile) => Promise<void>;
+  onClose: () => void;
+}
+
+export interface EditProfileModalProps {
+  profile: UserProfile;
+  onUpdate: (updatedProfile: UserProfile) => Promise<void>;
+  onClose: () => void;
+}
+
+export interface CreateWorkoutModalProps {
+  onSave: (workout: Exercise) => void;
+  onClose: () => void;
+}
+
+export interface ProgressModalProps {
+  profile: UserProfile;
+  onClose: () => void;
+}
+
+export interface Workout {
+  id: string;
+  name: string;
+  description: string;
+  duration: number;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  exercises: Exercise[];
+}
+
+export interface WorkoutHistory {
+  date: string;
+  exerciseName: string;
+  caloriesBurned: number;
+  exercise?: Exercise;
 }

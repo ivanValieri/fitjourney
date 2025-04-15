@@ -1,5 +1,6 @@
+import { Outlet, useNavigate } from 'react-router-dom';
 import Chatbot from './components/Chatbot';
-import { Exercise, UserProfile } from './types';
+import { Exercise, UserProfile, Workout, WorkoutHistory } from './types';
 import { useState, useMemo, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import Header from './components/Header';
@@ -23,14 +24,16 @@ import { askMistral } from './api/mistral';
 console.log("DEBUG: mistral.ts carregado?", typeof askMistral !== 'undefined');
 
 function App() {
-  const [userProfile, setUserProfile] = useState<UserProfile | undefined>(undefined);
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | undefined>(undefined);
+  const navigate = useNavigate();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [showProgress, setShowProgress] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
   const [session, setSession] = useState<any>(null);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showCreateWorkout, setShowCreateWorkout] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
   const { gradient } = useTheme();
 
   useEffect(() => {
@@ -67,7 +70,7 @@ function App() {
       if (session) {
         fetchUserProfile(session.user.id);
       } else {
-        setUserProfile(undefined);
+        setUserProfile(null);
         setShowProfileSetup(false);
       }
     });
@@ -84,7 +87,7 @@ function App() {
         return;
       }
       setSession(null);
-      setUserProfile(undefined);
+      setUserProfile(null);
       setShowProfileSetup(false);
       toast.success('Logout realizado com sucesso!');
     } catch (err: any) {
@@ -200,213 +203,142 @@ function App() {
         return achievement;
       }
 
-      let updatedAchievement = { ...achievement };
-      switch (achievement.id) {
-        case 'first-workout':
-          console.log(`Verificando first-workout: workoutsCompleted = ${currentProgress.workoutsCompleted}`);
-          if (currentProgress.workoutsCompleted >= 1) {
-            console.log('Desbloqueando conquista: Primeiro Treino');
-            toast.success('Conquista desbloqueada: Primeiro Treino!');
-            updatedAchievement = { ...achievement, completed: true };
-          }
-          break;
-        case 'five-workouts':
-          console.log(`Verificando five-workouts: workoutsCompleted = ${currentProgress.workoutsCompleted}`);
-          if (currentProgress.workoutsCompleted >= 5) {
-            console.log('Desbloqueando conquista: 5 Treinos Completos');
-            toast.success('Conquista desbloqueada: 5 Treinos Completos!');
-            updatedAchievement = { ...achievement, completed: true };
-          }
-          break;
-        case 'burn-500-calories':
-          console.log(`Verificando burn-500-calories: totalCaloriesBurned = ${currentProgress.totalCaloriesBurned}`);
-          if (currentProgress.totalCaloriesBurned >= 500) {
-            console.log('Desbloqueando conquista: Queimador de Calorias');
-            toast.success('Conquista desbloqueada: Queimador de Calorias!');
-            updatedAchievement = { ...achievement, completed: true };
-          }
-          break;
-        default:
-          console.log(`Conquista ${achievement.id} não reconhecida`);
-          break;
+      const isCompleted = achievement.requirements.some((req) => {
+        if (req.type === 'calories') {
+          return currentProgress.totalCaloriesBurned >= req.target;
+        } else if (req.type === 'workouts') {
+          return currentProgress.workoutsCompleted >= req.target;
+        }
+        return false;
+      });
+
+      if (isCompleted) {
+        console.log(`Conquista ${achievement.id} concluída!`);
+        toast.success(`Conquista desbloqueada: ${achievement.title}`);
       }
-      return updatedAchievement;
+
+      return {
+        ...achievement,
+        completed: isCompleted,
+      };
     });
 
-    console.log('Conquistas atualizadas:', updatedAchievements);
+    // Atualizar o banco de dados
+    supabase
+      .from('profiles')
+      .update({ achievements: updatedAchievements })
+      .eq('user_id', session.user.id)
+      .then(({ error }) => {
+        if (error) {
+          console.error('Erro ao atualizar conquistas:', error);
+          toast.error('Erro ao salvar conquistas.');
+        }
+      });
+
     return { achievements: updatedAchievements };
   };
 
   const handleWorkoutComplete = async (exercise: Exercise) => {
-    if (!userProfile || !session?.user?.id) {
-      console.log('handleWorkoutComplete: userProfile ou session não disponível');
+    if (!session?.user?.id || !userProfile) {
+      toast.error('Erro: Usuário não autenticado.');
       return;
     }
 
-    console.log('Concluindo treino:', exercise);
-
-    // Calcular o novo progresso
-    const updatedProgress = {
-      totalCaloriesBurned: (userProfile.progress?.totalCaloriesBurned || 0) + exercise.calories,
+    const currentProgress = {
+      totalCaloriesBurned: (userProfile.progress?.totalCaloriesBurned || 0) + exercise.caloriesBurned,
       workoutsCompleted: (userProfile.progress?.workoutsCompleted || 0) + 1,
     };
 
-    console.log('Novo progresso:', updatedProgress);
+    const { achievements } = updateAchievements(currentProgress);
 
-    // Atualizar o histórico de treinos
-    const updatedWorkoutHistory = [
-      ...(userProfile.workoutHistory || []),
-      {
-        date: new Date().toISOString(),
-        exerciseName: exercise.name,
-        caloriesBurned: exercise.calories,
-      },
-    ];
-
-    // Verificar e atualizar conquistas
-    const { achievements: updatedAchievements } = updateAchievements(updatedProgress);
-
-    // Atualizar o perfil no Supabase
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        progress: updatedProgress,
-        workoutHistory: updatedWorkoutHistory,
-        achievements: updatedAchievements,
-      })
-      .eq('user_id', session.user.id);
-
-    if (error) {
-      console.error('Erro ao atualizar perfil:', error.message);
-      toast.error('Erro ao salvar progresso e conquistas.');
-      return;
-    }
-
-    // Atualizar o estado local
-    const updatedProfile = {
-      ...userProfile,
-      progress: updatedProgress,
-      workoutHistory: updatedWorkoutHistory,
-      achievements: updatedAchievements,
+    const workoutHistory: WorkoutHistory = {
+      date: new Date().toISOString(),
+      exerciseName: exercise.name,
+      caloriesBurned: exercise.caloriesBurned,
+      exercise
     };
 
-    console.log('Atualizando estado local com perfil:', updatedProfile);
+    const updatedProfile: UserProfile = {
+      ...userProfile,
+      progress: currentProgress,
+      workoutHistory: [...(userProfile.workoutHistory || []), workoutHistory],
+      achievements
+    };
+
     setUserProfile(updatedProfile);
+    setShowProgress(true);
+    toast.success('Treino concluído com sucesso!');
   };
 
   const handleCreateWorkout = (workout: Exercise) => {
-    try {
-      if (!userProfile) return;
-      const updatedProfile: UserProfile = {
-        ...userProfile,
-        customWorkouts: [...(userProfile.customWorkouts || []), workout]
-      };
-      setUserProfile(updatedProfile);
-      toast.success('Treino criado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao criar treino:', error);
-      toast.error('Erro ao criar treino');
-    }
-  };
-
-  const handleToggleFavorite = async (exerciseId: string) => {
-    if (!userProfile || !session?.user?.id) {
-      toast.error('Você precisa estar logado para favoritar exercícios.');
+    if (!session?.user?.id || !userProfile) {
+      toast.error('Erro: Usuário não autenticado.');
       return;
     }
 
-    const isCurrentlyFavorite = userProfile.favorites.includes(exerciseId);
-    const newFavorites = isCurrentlyFavorite
-      ? userProfile.favorites.filter(id => id !== exerciseId)
-      : [...userProfile.favorites, exerciseId];
+    const updatedProfile = {
+      ...userProfile,
+      customWorkouts: [...(userProfile.customWorkouts || []), workout],
+    };
 
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ favorites: newFavorites })
-        .eq('user_id', session.user.id);
-
-      if (error) {
-        console.error('Erro ao atualizar favoritos:', error.message);
-        toast.error('Erro ao atualizar favoritos.');
-        return;
-      }
-
-      const updatedProfile: UserProfile = {
-        ...userProfile,
-        favorites: newFavorites
-      };
-      setUserProfile(updatedProfile);
-      
-      toast.success(isCurrentlyFavorite ? 'Removido dos favoritos!' : 'Adicionado aos favoritos!');
-    } catch (err) {
-      console.error('Erro ao atualizar favoritos:', err);
-      toast.error('Erro ao atualizar favoritos.');
-    }
+    supabase
+      .from('profiles')
+      .update(updatedProfile)
+      .eq('user_id', session.user.id)
+      .then(({ error }) => {
+        if (error) {
+          console.error('Erro ao salvar treino:', error.message);
+          toast.error(`Erro ao salvar treino: ${error.message}`);
+          return;
+        }
+        setUserProfile(updatedProfile);
+        setShowCreateWorkout(false);
+        toast.success('Treino personalizado criado com sucesso!');
+      });
   };
 
-  const adjustedExercises = useMemo(() => {
-    if (!userProfile) return BASE_EXERCISES;
+  const handleToggleFavorite = async (exerciseId: string) => {
+    if (!session?.user?.id || !userProfile) {
+      toast.error('Erro: Usuário não autenticado.');
+      return;
+    }
 
-    // Ajustar os treinos padrão (BASE_EXERCISES) com base no IMC, idade e duração preferida
-    const adjustedBaseExercises = BASE_EXERCISES.filter(exercise => {
-      const userIMC = userProfile.imc || 0;
-      const userAge = userProfile.age;
+    const currentFavorites = userProfile.favorites || [];
+    const isFavorite = currentFavorites.includes(exerciseId);
 
-      // Verificar se o exercício é adequado para o IMC do usuário
-      const isIMCSuitable = exercise.suitableFor.imcRange.min !== undefined && 
-                          exercise.suitableFor.imcRange.max !== undefined ? 
-                          (userIMC >= exercise.suitableFor.imcRange.min && 
-                           userIMC <= exercise.suitableFor.imcRange.max) :
-                          exercise.suitableFor.imcRange.min !== undefined ?
-                          userIMC >= exercise.suitableFor.imcRange.min :
-                          exercise.suitableFor.imcRange.max !== undefined ?
-                          userIMC <= exercise.suitableFor.imcRange.max :
-                          true;
+    const updatedFavorites = isFavorite
+      ? currentFavorites.filter((id) => id !== exerciseId)
+      : [...currentFavorites, exerciseId];
 
-      // Verificar se o exercício é adequado para a idade do usuário
-      const isAgeSuitable = exercise.suitableFor.ageRange.min !== undefined && 
-                           exercise.suitableFor.ageRange.max !== undefined ?
-                           (userAge >= exercise.suitableFor.ageRange.min && 
-                            userAge <= exercise.suitableFor.ageRange.max) :
-                           true;
+    const updatedProfile = {
+      ...userProfile,
+      favorites: updatedFavorites,
+    };
 
-      return isIMCSuitable && isAgeSuitable;
-    }).map(exercise => {
-      const durationRatio = userProfile.preferredDuration / exercise.duration;
-      const adjustedSteps = exercise.steps.map(step => {
-        return step.replace(/\d+\s+segundos/g, (match) => {
-          const seconds = parseInt(match);
-          const adjustedSeconds = Math.round(seconds * durationRatio);
-          return `${adjustedSeconds} segundos`;
-        });
-      });
+    const { error } = await supabase
+      .from('profiles')
+      .update(updatedProfile)
+      .eq('user_id', session.user.id);
 
-      return {
-        ...exercise,
-        duration: userProfile.preferredDuration,
-        calories: Math.round(exercise.calories * durationRatio),
-        steps: adjustedSteps,
-      };
-    });
+    if (error) {
+      console.error('Erro ao atualizar favoritos:', error.message);
+      toast.error(`Erro ao atualizar favoritos: ${error.message}`);
+      return;
+    }
 
-    // Combinar os treinos padrão ajustados com os treinos personalizados
-    const customWorkouts = userProfile.customWorkouts || [];
-    return [...adjustedBaseExercises, ...customWorkouts];
-  }, [userProfile]);
-
-  const favoriteExercises = useMemo(() => {
-    if (!userProfile?.favorites || userProfile.favorites.length === 0) return [];
-    return adjustedExercises.filter((exercise) =>
-      userProfile.favorites.includes(exercise.id)
+    setUserProfile(updatedProfile);
+    toast.success(
+      isFavorite
+        ? 'Exercício removido dos favoritos.'
+        : 'Exercício adicionado aos favoritos!'
     );
-  }, [adjustedExercises, userProfile?.favorites]);
+  };
 
   const getIMCStatus = (imc: number) => {
-    if (imc < 18.5) return { text: 'Abaixo do Peso', color: 'text-blue-600' };
-    if (imc < 25) return { text: 'Peso Normal', color: 'text-green-600' };
-    if (imc < 30) return { text: 'Sobrepeso', color: 'text-yellow-600' };
-    return { text: 'Obesidade', color: 'text-red-600' };
+    if (imc < 18.5) return 'Abaixo do peso';
+    if (imc < 25) return 'Peso normal';
+    if (imc < 30) return 'Sobrepeso';
+    return 'Obesidade';
   };
 
   const handleProfileComplete = async (profile: UserProfile) => {
@@ -415,355 +347,100 @@ function App() {
       return;
     }
 
-    const newProfile = {
+    const imc = profile.weight / Math.pow(profile.height / 100, 2);
+    const updatedProfile = {
       ...profile,
       user_id: session.user.id,
-      created_at: new Date().toISOString(),
+      imc,
       progress: { totalCaloriesBurned: 0, workoutsCompleted: 0 },
       workoutHistory: [],
       achievements: ACHIEVEMENTS,
       customWorkouts: [],
       favorites: [],
-      imc: profile.weight / ((profile.height / 100) * (profile.height / 100))
     };
 
-    const { error } = await supabase
-      .from('profiles')
-      .insert([newProfile]);
+    const { error } = await supabase.from('profiles').insert(updatedProfile);
 
     if (error) {
       console.error('Erro ao criar perfil:', error.message);
-      toast.error('Erro ao criar perfil.');
+      toast.error(`Erro ao criar perfil: ${error.message}`);
       return;
     }
 
-    setUserProfile(newProfile);
+    setUserProfile(updatedProfile);
     setShowProfileSetup(false);
     toast.success('Perfil criado com sucesso!');
   };
 
-  console.log('Estado atual:', { session, userProfile, showProfileSetup, showEditProfile });
-
-  if (!session) {
-    console.log('Usuário não autenticado, renderizando AuthModal');
-    return (
-      <div 
-        className="min-h-screen"
-        style={{
-          background: `linear-gradient(to bottom, ${gradient.startColor}, ${gradient.endColor})`,
-        }}
-      >
-        <AuthModal
-          onClose={() => {}}
-          onSuccess={() => console.log('Autenticação bem-sucedida')}
-          showClose={false}
-        />
-      </div>
-    );
-  }
-
-  if (showProfileSetup) {
-    console.log('Mostrando ProfileSetup');
-    return (
-      <div 
-        className="min-h-screen"
-        style={{
-          background: `linear-gradient(to bottom, ${gradient.startColor}, ${gradient.endColor})`,
-        }}
-      >
-        <ProfileSetup onComplete={handleProfileComplete} />
-      </div>
-    );
-  }
-
-  if (!userProfile) {
-    console.log('Carregando perfil...');
-    return (
-      <div 
-        className="min-h-screen flex items-center justify-center"
-        style={{
-          background: `linear-gradient(to bottom, ${gradient.startColor}, ${gradient.endColor})`,
-        }}
-      >
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando seu perfil...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const imcStatus = getIMCStatus(userProfile.imc || 0);
-
   return (
-    <div 
-      className="min-h-screen"
-      style={{
-        background: `linear-gradient(to bottom, ${gradient.startColor}, ${gradient.endColor})`,
-      }}
-    >
-      <Toaster position="top-center" />
-      <Header onAuthClick={handleLogout} isAuthenticated={true} />
-      <main className="pt-20 px-4 max-w-7xl mx-auto pb-12">
-        {/* Welcome Section */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-500 rounded-2xl p-8 text-white mb-8 relative">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-3xl font-bold">Bem-vindo de volta, {userProfile.name}!</h2>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => setShowEditProfile(true)}
-                className="p-2 hover:bg-white/20 rounded-full transition-colors"
-              >
-                <Pencil className="h-6 w-6" />
-              </button>
-            </div>
-          </div>
-          <p className="text-white/80 mb-6">Pronto para seu treino personalizado de hoje?</p>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="flex items-center space-x-3 bg-white/10 rounded-xl p-4">
-              <Activity className="h-8 w-8" />
-              <div>
-                <p className="text-sm opacity-80">Nível de Condicionamento</p>
-                <p className="font-semibold capitalize">
-                  {userProfile.fitnessLevel === 'beginner'
-                    ? 'Iniciante'
-                    : userProfile.fitnessLevel === 'intermediate'
-                    ? 'Intermediário'
-                    : 'Avançado'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3 bg-white/10 rounded-xl p-4">
-              <Target className="h-8 w-8" />
-              <div>
-                <p className="text-sm opacity-80">Objetivo</p>
-                <p className="font-semibold capitalize">
-                  {userProfile.goal?.type === 'weight-loss' ? 'Perda de Peso' : 'Manter Forma'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3 bg-white/10 rounded-xl p-4">
-              <Scale className="h-8 w-8" />
-              <div>
-                <p className="text-sm opacity-80">IMC</p>
-                <p className={`font-semibold ${imcStatus.color}`}>
-                  {userProfile.imc || 0} - {imcStatus.text}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3 bg-white/10 rounded-xl p-4">
-              <Clock className="h-8 w-8" />
-              <div>
-                <p className="text-sm opacity-80">Duração do Treino</p>
-                <p className="font-semibold">{userProfile.preferredDuration} minutos</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Seu Plano Diário */}
-        <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Seu Plano Diário</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-700">
-                Meta Calórica: {userProfile.recommendedPlan?.dailyCalories || 0} kcal
-              </h4>
-              <div className="bg-gray-50 p-4 rounded-xl">
-                <h5 className="font-medium text-gray-900 mb-2">Macronutrientes Recomendados</h5>
-                <ul className="space-y-2 text-gray-600">
-                  <li>Proteínas: {userProfile.recommendedPlan?.macros.protein || 0}g</li>
-                  <li>Carboidratos: {userProfile.recommendedPlan?.macros.carbs || 0}g</li>
-                  <li>Gorduras: {userProfile.recommendedPlan?.macros.fats || 0}g</li>
-                </ul>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-700">Plano de Treino</h4>
-              <div className="bg-gray-50 p-4 rounded-xl">
-                <ul className="space-y-2 text-gray-600">
-                  {userProfile.recommendedPlan?.workoutPlan.recommendedExercises.map(
-                    (exercise, index) => (
-                      <li key={index} className="flex items-center space-x-2">
-                        <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                        <span>{exercise}</span>
-                      </li>
-                    )
-                  ) || <li>Nenhum plano de treino disponível.</li>}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Plano Alimentar Recomendado */}
-        <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Plano Alimentar Recomendado</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-gray-50 p-4 rounded-xl">
-              <h4 className="font-semibold text-gray-700 mb-2">Café da Manhã</h4>
-              <ul className="space-y-1 text-gray-600">
-                {userProfile.recommendedPlan?.mealPlan.breakfast.map((item, index) => (
-                  <li key={index} className="text-sm">{item}</li>
-                )) || <li>Nenhum plano alimentar disponível.</li>}
-              </ul>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-xl">
-              <h4 className="font-semibold text-gray-700 mb-2">Almoço</h4>
-              <ul className="space-y-1 text-gray-600">
-                {userProfile.recommendedPlan?.mealPlan.lunch.map((item, index) => (
-                  <li key={index} className="text-sm">{item}</li>
-                )) || <li>Nenhum plano alimentar disponível.</li>}
-              </ul>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-xl">
-              <h4 className="font-semibold text-gray-700 mb-2">Jantar</h4>
-              <ul className="space-y-1 text-gray-600">
-                {userProfile.recommendedPlan?.mealPlan.dinner.map((item, index) => (
-                  <li key={index} className="text-sm">{item}</li>
-                )) || <li>Nenhum plano alimentar disponível.</li>}
-              </ul>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-xl">
-              <h4 className="font-semibold text-gray-700 mb-2">Lanches</h4>
-              <ul className="space-y-1 text-gray-600">
-                {userProfile.recommendedPlan?.mealPlan.snacks.map((item, index) => (
-                  <li key={index} className="text-sm">{item}</li>
-                )) || <li>Nenhum plano alimentar disponível.</li>}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Estatísticas */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div
-            className="bg-white p-6 rounded-2xl shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
-            onClick={() => setShowProgress(true)}
-          >
-            <Flame className="h-8 w-8 text-orange-500 mb-2" />
-            <p className="text-sm text-gray-600">Calorias Queimadas</p>
-            <p className="text-2xl font-bold text-gray-900">
-              {userProfile.progress?.totalCaloriesBurned || 0}
-            </p>
-          </div>
-          <div
-            className="bg-white p-6 rounded-2xl shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
-            onClick={() => setShowProgress(true)}
-          >
-            <Clock className="h-8 w-8 text-blue-500 mb-2" />
-            <p className="text-sm text-gray-600">Minutos Ativos</p>
-            <p className="text-2xl font-bold text-gray-900">
-              {(userProfile.progress?.workoutsCompleted || 0) * (userProfile.preferredDuration || 0)}
-            </p>
-          </div>
-          <div
-            className="bg-white p-6 rounded-2xl shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
-            onClick={() => setShowProgress(true)}
-          >
-            <Dumbbell className="h-8 w-8 text-purple-500 mb-2" />
-            <p className="text-sm text-gray-600">Treinos Realizados</p>
-            <p className="text-2xl font-bold text-gray-900">
-              {userProfile.progress?.workoutsCompleted || 0}
-            </p>
-          </div>
-          <div
-            className="bg-white p-6 rounded-2xl shadow-sm cursor-pointer hover:bg-gray-50 transition-colors"
-            onClick={() => setShowAchievements(true)}
-          >
-            <Trophy className="h-8 w-8 text-yellow-500 mb-2" />
-            <p className="text-sm text-gray-600">Conquistas</p>
-            <p className="text-2xl font-bold text-gray-900">
-              {userProfile.achievements?.filter((a) => a.completed).length || 0}
-            </p>
-          </div>
-        </div>
-
-        {/* Seção de Favoritos */}
-        <section className="mb-8">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-2xl font-bold text-gray-900">Seus Favoritos</h3>
-            <button className="text-purple-600 hover:text-purple-700 font-medium">
-              Ver Todos
-            </button>
-          </div>
-          {favoriteExercises.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {favoriteExercises.map((exercise) => (
-                <WorkoutCard
-                  key={exercise.id}
-                  exercise={exercise}
-                  onClick={() => setSelectedExercise(exercise)}
-                  onComplete={handleWorkoutComplete}
-                  favorites={userProfile.favorites || []}
-                  onToggleFavorite={handleToggleFavorite}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-600">Você ainda não tem treinos favoritados. Adicione alguns clicando no coração!</p>
-          )}
-        </section>
-
-        {/* Treinos Recomendados */}
-        <section>
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-2xl font-bold text-gray-900">Treinos Recomendados para Hoje</h3>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => setShowCreateWorkout(true)}
-                className="text-purple-600 hover:text-purple-700 font-medium"
-              >
-                Criar Novo Treino
-              </button>
-              <button className="text-purple-600 hover:text-purple-700 font-medium">Ver Todos</button>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {adjustedExercises.map((exercise) => (
-              <WorkoutCard
-                key={exercise.id}
-                exercise={exercise}
-                onClick={() => setSelectedExercise(exercise)}
-                onComplete={handleWorkoutComplete}
-                favorites={userProfile.favorites || []}
-                onToggleFavorite={handleToggleFavorite}
-              />
-            ))}
-          </div>
-        </section>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Toaster position="top-right" />
+      <Header isAuthenticated={!!session} onAuthClick={() => setShowAuth(true)} />
+      
+      <main className="pt-16 pb-8 px-4 sm:px-6 lg:px-8">
+        <Outlet />
       </main>
 
-      {selectedExercise && (
-        <ExerciseTutorial exercise={selectedExercise} onClose={() => setSelectedExercise(undefined)} />
+      {showAuth && (
+        <AuthModal
+          onClose={() => setShowAuth(false)}
+          onSuccess={() => {
+            setShowAuth(false);
+            if (!userProfile) {
+              setShowProfileSetup(true);
+            }
+          }}
+        />
       )}
-      {showProgress && (
+
+      {showProfileSetup && (
+        <ProfileSetup
+          onComplete={handleProfileComplete}
+        />
+      )}
+
+      {showEditProfile && userProfile && (
+        <EditProfileModal
+          profile={userProfile}
+          onUpdate={handleProfileUpdate}
+          onClose={() => setShowEditProfile(false)}
+        />
+      )}
+
+      {showCreateWorkout && (
+        <CreateWorkoutModal
+          onCreate={handleCreateWorkout}
+          onClose={() => setShowCreateWorkout(false)}
+        />
+      )}
+
+      {showProgress && userProfile && (
         <ProgressModal
           progress={userProfile.progress || { totalCaloriesBurned: 0, workoutsCompleted: 0 }}
           workoutHistory={userProfile.workoutHistory || []}
           onClose={() => setShowProgress(false)}
         />
       )}
-      {showAchievements && (
+
+      {showAchievements && userProfile && (
         <AchievementsModal
           achievements={userProfile.achievements || ACHIEVEMENTS}
           onClose={() => setShowAchievements(false)}
         />
       )}
-      {showEditProfile && (
-        <EditProfileModal
-          profile={userProfile}
-          onSave={handleProfileUpdate}
-          onClose={() => setShowEditProfile(false)}
+
+      {selectedExercise && (
+        <ExerciseTutorial
+          exercise={selectedExercise}
+          onClose={() => setSelectedExercise(null)}
         />
       )}
-      {showCreateWorkout && (
-        <CreateWorkoutModal
-          onClose={() => setShowCreateWorkout(false)}
-          onCreate={handleCreateWorkout}
+
+      {session && userProfile && (
+        <Chatbot
+          onWorkoutComplete={handleWorkoutComplete}
         />
       )}
-       <Chatbot />
     </div>
   );
 }

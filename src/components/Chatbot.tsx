@@ -1,10 +1,12 @@
+import React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, Send, X } from 'lucide-react';
 import { askMistral } from '../api/mistral';
 import { ChatService } from '../api/chatService';
-import { ChatMessage } from '../types';
+import { ChatMessage, Exercise } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
+import { ChatbotProps } from './types';
 
 interface Message {
   text: string;
@@ -12,7 +14,7 @@ interface Message {
   timestamp?: string;
 }
 
-export default function Chatbot() {
+const Chatbot: React.FC<ChatbotProps> = ({ onWorkoutComplete }) => {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -213,4 +215,6 @@ export default function Chatbot() {
       )}
     </div>
   );
-}
+};
+
+export default Chatbot;

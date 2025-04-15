@@ -11,12 +11,49 @@ interface AuthModalProps {
 
 export default function AuthModal({ onClose, onSuccess, showClose = true }: AuthModalProps) {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isResetPassword, setIsResetPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   console.log('Renderizando AuthModal', { email, password, isSignUp, loading, error });
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    if (!email) {
+      setError('Por favor, informe seu e-mail.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        console.error('Erro ao enviar email de recuperação:', error.message);
+        setError(error.message);
+        toast.error(`Erro ao enviar email: ${error.message}`);
+        setLoading(false);
+        return;
+      }
+
+      toast.success('Email de recuperação enviado com sucesso! Verifique sua caixa de entrada.');
+      setIsResetPassword(false);
+      setEmail('');
+    } catch (err: any) {
+      console.error('Erro inesperado:', err.message);
+      setError('Ocorreu um erro inesperado. Tente novamente.');
+      toast.error('Erro inesperado. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,10 +135,10 @@ export default function AuthModal({ onClose, onSuccess, showClose = true }: Auth
           )}
 
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            {isSignUp ? 'Crie sua Conta' : 'Faça Login'}
+            {isResetPassword ? 'Recuperar Senha' : isSignUp ? 'Crie sua Conta' : 'Faça Login'}
           </h2>
 
-          <form onSubmit={handleAuth} className="space-y-4">
+          <form onSubmit={isResetPassword ? handleResetPassword : handleAuth} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
               <div className="relative">
@@ -117,23 +154,26 @@ export default function AuthModal({ onClose, onSuccess, showClose = true }: Auth
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 rounded-xl border-gray-300 focus:border-purple-500 focus:ring-purple-500"
-                  placeholder="••••••"
-                  required
-                />
+            {!isResetPassword && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-10 rounded-xl border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                    placeholder="••••••"
+                    required
+                  />
+                </div>
               </div>
-              {error && (
-                <p className="mt-2 text-sm text-red-600">{error}</p>
-              )}
-            </div>
+            )}
+
+            {error && (
+              <p className="mt-2 text-sm text-red-600">{error}</p>
+            )}
 
             <button
               type="submit"
@@ -144,7 +184,14 @@ export default function AuthModal({ onClose, onSuccess, showClose = true }: Auth
                 'Carregando...'
               ) : (
                 <>
-                  <span>{isSignUp ? 'Criar Conta' : 'Entrar'}</span>
+                  <span>
+                    {isResetPassword 
+                      ? 'Enviar Email de Recuperação' 
+                      : isSignUp 
+                        ? 'Criar Conta' 
+                        : 'Entrar'
+                    }
+                  </span>
                   <ArrowRight className="h-5 w-5" />
                 </>
               )}
@@ -152,18 +199,41 @@ export default function AuthModal({ onClose, onSuccess, showClose = true }: Auth
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              {isSignUp ? 'Já tem uma conta?' : 'Não tem uma conta?'}
+            {!isResetPassword ? (
+              <>
+                <p className="text-sm text-gray-600">
+                  {isSignUp ? 'Já tem uma conta?' : 'Não tem uma conta?'}
+                  <button
+                    onClick={() => {
+                      setIsSignUp(!isSignUp);
+                      setError(null);
+                    }}
+                    className="ml-1 text-purple-600 hover:text-purple-700 font-medium"
+                  >
+                    {isSignUp ? 'Faça login' : 'Crie uma conta'}
+                  </button>
+                </p>
+                <button
+                  onClick={() => {
+                    setIsResetPassword(true);
+                    setError(null);
+                  }}
+                  className="mt-2 text-sm text-purple-600 hover:text-purple-700 font-medium"
+                >
+                  Esqueceu sua senha?
+                </button>
+              </>
+            ) : (
               <button
                 onClick={() => {
-                  setIsSignUp(!isSignUp);
+                  setIsResetPassword(false);
                   setError(null);
                 }}
-                className="ml-1 text-purple-600 hover:text-purple-700 font-medium"
+                className="text-sm text-purple-600 hover:text-purple-700 font-medium"
               >
-                {isSignUp ? 'Faça login' : 'Crie uma conta'}
+                Voltar para o login
               </button>
-            </p>
+            )}
           </div>
         </div>
       </div>

@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import React from 'react';
+import { useState, useEffect } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { UserProfile, Goal } from '../types';
 import { ChevronRight, User2, Scale, Ruler } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { ProfileSetupProps } from './types';
 
-interface ProfileSetupProps {
-  onComplete: (profile: UserProfile) => void;
-}
-
-export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
+const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
   const [step, setStep] = useState(1);
   const [profile, setProfile] = useState<Partial<UserProfile>>({});
   const [goal, setGoal] = useState<Goal>({
@@ -368,4 +368,6 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
       </div>
     </div>
   );
-}
+};
+
+export default ProfileSetup;

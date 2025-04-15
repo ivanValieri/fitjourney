@@ -1,6 +1,7 @@
 import { StrictMode, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
+import { RouterProvider } from 'react-router-dom';
+import { router } from './routes';
 import './index.css';
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -27,7 +28,7 @@ const AppWithCSSLoader = () => {
 
   return (
     <ThemeProvider>
-      <App />
+      <RouterProvider router={router} />
     </ThemeProvider>
   );
 };

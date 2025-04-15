@@ -1,14 +1,10 @@
+import React from 'react';
 import { useState, useEffect } from 'react';
 import { X, ArrowRight } from 'lucide-react';
 import { UserProfile } from '../types';
+import { EditProfileModalProps } from './types';
 
-interface EditProfileModalProps {
-  profile: UserProfile;
-  onSave: (updatedProfile: UserProfile) => void;
-  onClose: () => void;
-}
-
-export default function EditProfileModal({ profile, onSave, onClose }: EditProfileModalProps) {
+const EditProfileModal: React.FC<EditProfileModalProps> = ({ profile, onUpdate, onClose }) => {
   const [formData, setFormData] = useState<UserProfile>({
     name: profile.name || '',
     age: profile.age || 0,
@@ -63,7 +59,7 @@ export default function EditProfileModal({ profile, onSave, onClose }: EditProfi
       favorites: formData.favorites || [],
     };
 
-    onSave(updatedProfile);
+    onUpdate(updatedProfile);
     setLoading(false);
   };
 
@@ -190,4 +186,6 @@ export default function EditProfileModal({ profile, onSave, onClose }: EditProfi
       </div>
     </div>
   );
-}
+};
+
+export default EditProfileModal;

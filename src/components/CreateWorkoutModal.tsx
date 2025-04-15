@@ -4,15 +4,12 @@
 // gol
 
 
+import React from 'react';
 import { useState } from 'react';
-import { X, Plus } from 'lucide-react';
+import { X, ArrowRight, Plus, Minus } from 'lucide-react';
 import type { Exercise } from '../types';
 import toast from 'react-hot-toast';
-
-interface CreateWorkoutModalProps {
-  onClose: () => void;
-  onCreate: (workout: Exercise) => void;
-}
+import { CreateWorkoutModalProps } from './types';
 
 const CreateWorkoutModal: React.FC<CreateWorkoutModalProps> = ({ onClose, onCreate }) => {
   const [name, setName] = useState('');
@@ -36,30 +33,30 @@ const CreateWorkoutModal: React.FC<CreateWorkoutModalProps> = ({ onClose, onCrea
     setSteps(steps.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!name || !duration || !calories || steps.some(step => !step.trim())) {
       toast.error('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
-    const newWorkout = {
-      id: `custom-${Date.now()}`,
+    const newWorkout: Exercise = {
+      id: `workout-${Date.now()}`,
       name,
       description: steps.join('\n'),
-      duration,
-      calories,
-      steps,
-      tips: [] as string[],
-      commonMistakes: [] as string[],
-      targetMuscles: [] as string[],
-      secondaryMuscles: [] as string[],
-      nutrition: {
-        preTreino: [] as string[],
-        posTreino: [] as string[]
-      },
-      imageUrl: '',
+      imageUrl: videoUrl || 'https://via.placeholder.com/500',
+      duration: Number(duration),
+      calories: Number(calories),
+      caloriesBurned: Number(calories),
       difficulty: 'beginner',
       muscleGroup: '',
+      steps,
+      tips: [],
+      commonMistakes: [],
+      targetMuscles: [],
+      secondaryMuscles: [],
+      precautions: [],
+      custom: true,
       suitableFor: {
         imcRange: {
           min: 0,
@@ -71,14 +68,14 @@ const CreateWorkoutModal: React.FC<CreateWorkoutModalProps> = ({ onClose, onCrea
         }
       },
       modifications: {
-        easier: [] as string[],
-        harder: [] as string[]
+        easier: [],
+        harder: []
       }
-    } satisfies Exercise;
-
+    };
+    
     onCreate(newWorkout);
-    toast.success('Treino criado com sucesso!');
     onClose();
+    toast.success('Treino personalizado criado com sucesso!');
   };
 
   return (
