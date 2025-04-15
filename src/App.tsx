@@ -25,8 +25,8 @@ console.log("DEBUG: mistral.ts carregado?", typeof askMistral !== 'undefined');
 
 function App() {
   const navigate = useNavigate();
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | undefined>(undefined);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | undefined>(undefined);
   const [showProgress, setShowProgress] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
   const [session, setSession] = useState<any>(null);
@@ -70,7 +70,7 @@ function App() {
       if (session) {
         fetchUserProfile(session.user.id);
       } else {
-        setUserProfile(null);
+        setUserProfile(undefined);
         setShowProfileSetup(false);
       }
     });
@@ -87,7 +87,7 @@ function App() {
         return;
       }
       setSession(null);
-      setUserProfile(null);
+      setUserProfile(undefined);
       setShowProfileSetup(false);
       toast.success('Logout realizado com sucesso!');
     } catch (err: any) {
@@ -396,28 +396,28 @@ function App() {
       {showProfileSetup && (
         <ProfileSetup
           onComplete={handleProfileComplete}
+          onClose={() => setShowProfileSetup(false)}
         />
       )}
 
       {showEditProfile && userProfile && (
         <EditProfileModal
           profile={userProfile}
-          onUpdate={handleProfileUpdate}
+          onSave={handleProfileUpdate}
           onClose={() => setShowEditProfile(false)}
         />
       )}
 
       {showCreateWorkout && (
         <CreateWorkoutModal
-          onCreate={handleCreateWorkout}
+          onSave={handleCreateWorkout}
           onClose={() => setShowCreateWorkout(false)}
         />
       )}
 
       {showProgress && userProfile && (
         <ProgressModal
-          progress={userProfile.progress || { totalCaloriesBurned: 0, workoutsCompleted: 0 }}
-          workoutHistory={userProfile.workoutHistory || []}
+          profile={userProfile}
           onClose={() => setShowProgress(false)}
         />
       )}
@@ -432,12 +432,13 @@ function App() {
       {selectedExercise && (
         <ExerciseTutorial
           exercise={selectedExercise}
-          onClose={() => setSelectedExercise(null)}
+          onClose={() => setSelectedExercise(undefined)}
         />
       )}
 
       {session && userProfile && (
         <Chatbot
+          userProfile={userProfile}
           onWorkoutComplete={handleWorkoutComplete}
         />
       )}

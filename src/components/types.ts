@@ -2,25 +2,26 @@ import { UserProfile, Exercise, WorkoutHistory, Progress } from '../types';
 
 export interface ProfileSetupProps {
   onComplete: (profile: UserProfile) => Promise<void>;
+  onClose: () => void;
 }
 
 export interface EditProfileModalProps {
   profile: UserProfile;
-  onUpdate: (updatedProfile: UserProfile) => Promise<void>;
+  onSave: (updatedProfile: UserProfile) => Promise<void>;
   onClose: () => void;
 }
 
 export interface CreateWorkoutModalProps {
-  onCreate: (workout: Exercise) => void;
+  onSave: (workout: Exercise) => void;
   onClose: () => void;
 }
 
 export interface ProgressModalProps {
-  progress: Progress;
-  workoutHistory: WorkoutHistory[];
+  profile: UserProfile;
   onClose: () => void;
 }
 
 export interface ChatbotProps {
+  userProfile: UserProfile;
   onWorkoutComplete: (exercise: Exercise) => Promise<void>;
 } 
