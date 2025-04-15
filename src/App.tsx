@@ -303,12 +303,13 @@ function App() {
       return;
     }
 
-    const currentFavorites = userProfile.favorites || [];
-    const isFavorite = currentFavorites.includes(exerciseId);
+    let updatedFavorites: string[];
 
-    const updatedFavorites = isFavorite
-      ? currentFavorites.filter((id) => id !== exerciseId)
-      : [...currentFavorites, exerciseId];
+    if (userProfile.favorites.includes(exerciseId)) {
+      updatedFavorites = userProfile.favorites.filter((id) => id !== exerciseId);
+    } else {
+      updatedFavorites = [...userProfile.favorites, exerciseId];
+    }
 
     const updatedProfile = {
       ...userProfile,
@@ -317,7 +318,7 @@ function App() {
 
     const { error } = await supabase
       .from('profiles')
-      .update(updatedProfile)
+      .update({ favorites: updatedFavorites })
       .eq('user_id', session.user.id);
 
     if (error) {
@@ -328,9 +329,9 @@ function App() {
 
     setUserProfile(updatedProfile);
     toast.success(
-      isFavorite
-        ? 'Exercício removido dos favoritos.'
-        : 'Exercício adicionado aos favoritos!'
+      updatedFavorites.includes(exerciseId)
+        ? 'Exercício adicionado aos favoritos!'
+        : 'Exercício removido dos favoritos!'
     );
   };
 
