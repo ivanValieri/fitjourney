@@ -1,0 +1,7 @@
+[33mcommit afed0fc17709ad86665581bbd45a80e31a2ee1c5[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfix-css-layout[m[33m, [m[1;31morigin/fix-css-layout[m[33m)[m
+Author: Ivan Thadeu Valieri <prof.ivan.valieri@gmail.com>
+Date:   Wed Apr 9 14:13:38 2025 -0300
+
+    fix: update postcss config to use @tailwindcss/postcss
+
+M	postcss.config.cjs
